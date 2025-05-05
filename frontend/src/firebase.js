@@ -1,8 +1,8 @@
 // frontend/src/firebase.js
 
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 
 // Optional: not needed unless you use Analytics
 // import { getAnalytics } from "firebase/analytics";
@@ -18,7 +18,13 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+// ✅ Connect to emulators when using localhost
+if (location.hostname === "localhost") {
+  connectAuthEmulator(auth, "http://localhost:9099");
+  connectFirestoreEmulator(db, "localhost", 8080);
+}
+
 export { app };

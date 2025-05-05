@@ -43,6 +43,8 @@
     "ui": {
       "enabled": true
     },
-    "singleProjectMode": true
+    "singleProjectMode": true,
+    "exportOnExit": true
   }
 }
+
