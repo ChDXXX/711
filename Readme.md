@@ -36,7 +36,7 @@ How to use Firestore and Firebase Auth in local development :
                 connectFirestoreEmulator(db, "localhost", 8080);
             }
 
-    Still we can use non local Firebase (Auth, Firestore) by these lines :
+    Still we can use non local Firebase (Auth, Firestore) by commenting these lines :
 
             if (location.hostname === "localhost") {
                 connectAuthEmulator(auth, "http://localhost:9099");
