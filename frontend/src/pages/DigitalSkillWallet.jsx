@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-const StudentProfile = () => {
+const DigitalSkillWallet = () => {
   const { user, role } = useAuth();
   const [email, setEmail] = useState("");
   const [customUid, setCustomUid] = useState("");
@@ -102,4 +102,4 @@ const StudentProfile = () => {
   );
 };
 
-export default StudentProfile;
+export default DigitalSkillWallet;
