@@ -44,10 +44,10 @@ const AppRouter = createBrowserRouter([
       children:[
         {index: true, element: <StudentHome />},
         {path: "request-skill", element: <StudentRequestSkill />},
+        // {path: "profile", element: <StudentProfile />}, // Digital skill wallet
       ]},      
       
-      {path: "profile", element: <StudentProfile />}, // Digital skill wallet
-
+    
       {path: "school",
        element: <SchoolPage />,
        children: [
@@ -60,7 +60,7 @@ const AppRouter = createBrowserRouter([
 
 
       
-      {path: "employer", element: <EmployerPage />},
+      // {path: "employer", element: <EmployerPage />},
       {path: "admin", element: <AdminPage />},
       {path: "sync", element: <SyncUserDocPage />},
       {path: "redirect", element: <RedirectByRole />},

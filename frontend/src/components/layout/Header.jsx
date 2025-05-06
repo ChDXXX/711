@@ -5,13 +5,13 @@ import { useDisclosure } from '@mantine/hooks';
 import { useAuth } from "../../context/AuthContext";
 import { useFireStoreUser } from '../../hooks/useFirestoreUser';
 import classes from './Header.module.css';
-import logo from '../../../public/favicon.ico';
+import logo from '../../assets/Kanavoogle_logo.png';
 import UserMenu from './UserMenu';
 
 const links = [
-    { link: '/about', label: 'Features' },
+    { link: '/about', label: 'Why Kanavoogle?' },
+    { link: '/learn', label: 'Services' },
     { link: '/pricing', label: 'Pricing' },
-    { link: '/learn', label: 'Learn' },
     { link: '/community', label: 'Community' },
 ];
 
@@ -43,7 +43,7 @@ export default function Header() {
 
     <Container fluid className={classes.inner}>
       
-      <Image src={logo} w="90px"></Image>
+      <Image src={logo} w="40px" radius="md"></Image>
 
       <Group gap={5} visibleFrom="xs">
         {items}

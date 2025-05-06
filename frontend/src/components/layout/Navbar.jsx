@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { IconCalendarStats, IconDeviceDesktopAnalytics, IconFingerprint, IconGauge, IconHome2, IconLogout, IconSettings, IconSwitchHorizontal, IconUser} from '@tabler/icons-react';
 import { Center, Stack, Tooltip, UnstyledButton, Image } from '@mantine/core';
 import classes from './Navbar.module.css';
-import logo from '../../../public/favicon.ico';
+import logo from '../../assets/Kanavoogle_logo.png';
 
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';

@@ -1,6 +1,6 @@
 import { Anchor, Container, Group, Image } from '@mantine/core';
+import logo from '../../assets/Kanavoogle_logo.png';
 import classes from './Footer.module.css';
-import logo from '../../../public/favicon.ico';
 
 const links = [
     { link: '#', label: 'Contact' },
@@ -16,7 +16,7 @@ export default function Footer() {
     </Anchor>));
     return (<div className={classes.footer}>
       <Container className={classes.inner}>
-        <Image src={logo} w="90px"></Image>
+        <Image src={logo} radius="md" w="40px"></Image>
         <Group className={classes.links}>{items}</Group>
       </Container>
     </div>);
