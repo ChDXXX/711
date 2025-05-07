@@ -90,6 +90,7 @@ router.post("/", verifyToken, async (req, res) => {
   const { title, description, price, location, skills } = req.body;
   const { uid, role } = req.user;
 
+
   if (role !== "employer") return res.status(403).send("Only employers can create jobs");
 
   if (!title || !description || !price || !location || !skills) {
@@ -104,7 +105,7 @@ router.post("/", verifyToken, async (req, res) => {
       location,
       skills,
       employerId: uid,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: new Date().toISOString(),
       status: "pending",
       verified: false
     });
