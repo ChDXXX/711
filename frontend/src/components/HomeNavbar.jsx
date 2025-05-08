@@ -103,7 +103,7 @@ export default function HomeNavbar(props) {
             href={'profile'} 
             onClick={(event) => {
               event.preventDefault();
-              navigate('profile');
+              navigate('digital-skill-wallet');
             }}>
             <Group justify="space-between" align="center" w="100%">
               <Group gap="xs" align="center">

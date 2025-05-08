@@ -7,17 +7,16 @@ import HomePage from '../pages/HomePage';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import UnauthorizedPage from '../pages/Unauthorized';
+import WhyKanavoogle from '../pages/WhyKanavoogle';
 
 import StudentPage from "../pages/StudentPage";
 import StudentHome from '../pages/StudentHome';
 import StudentRequestSkill from '../pages/StudentRequestSkill';
-import StudentProfile from "../pages/StudentProfile";
+import DigitalSkillWallet from '../pages/DigitalSkillWallet';
 
 import SchoolPage from "../pages/SchoolPage";
 
 import SchoolVerifySkill from '../pages/SchoolVerifySkill';
-import SchoolStudents from '../pages/SchoolStudents';
-import SchoolCourses from '../pages/SchoolCourses';
 
 import EmployerPage from "../pages/EmployerPage";
 import AdminPage from "../pages/AdminPage";
@@ -26,6 +25,8 @@ import RedirectByRole from "../components/auth/RedirectByRole";
 
 import ErrorPage from '../pages/ErrorPage';
 import SchoolHome from '../pages/SchoolHome';
+
+
 
 
 const AppRouter = createBrowserRouter([
@@ -37,6 +38,7 @@ const AppRouter = createBrowserRouter([
       {path: "register", element: <Register />},
       {path: "login", element: <Login />},
       {path: "unauthorized", element: <UnauthorizedPage />},
+      {path: "why-kanavoogle", element: <WhyKanavoogle />},
 
       // Role pages
       {path: "student",
@@ -44,17 +46,23 @@ const AppRouter = createBrowserRouter([
       children:[
         {index: true, element: <StudentHome />},
         {path: "request-skill", element: <StudentRequestSkill />},
+<<<<<<< HEAD
         // {path: "profile", element: <StudentProfile />}, // Digital skill wallet
       ]},      
       
     
+=======
+        {path: "digital-skill-wallet", element: <DigitalSkillWallet />}, 
+      ]},      
+      
+      
+
+>>>>>>> main
       {path: "school",
        element: <SchoolPage />,
        children: [
         {index: true, element: <SchoolHome />},
         {path: "verify-skill", element: <SchoolVerifySkill />},
-        {path: "students", element: <SchoolStudents />},
-        {path: "courses", element: <SchoolCourses />},
        ]},
 
 

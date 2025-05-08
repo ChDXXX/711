@@ -16,7 +16,11 @@ export default function Footer() {
     </Anchor>));
     return (<div className={classes.footer}>
       <Container className={classes.inner}>
+<<<<<<< HEAD
         <Image src={logo} radius="md" w="40px"></Image>
+=======
+        <Image></Image>
+>>>>>>> main
         <Group className={classes.links}>{items}</Group>
       </Container>
     </div>);
