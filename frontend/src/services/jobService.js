@@ -30,6 +30,44 @@ export const createJob = async (jobData, token) => {
   }
 };
 
+export const fetchJobById = async (jobId, token) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/job/${jobId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching job by ID:', error);
+    throw error;
+  }
+};
+
+export const updateJob = async (jobId, jobData, token) => {
+  try {
+    const response = await axios.put(`${BASE_URL}/job/${jobId}`, jobData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    console.log('Job updated:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating job:', error);
+    throw error;
+  }
+};
+
+
+export const findStudentsBySkill = async (skill, token) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/employer/students/skills/${skill}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error searching students by skill:', error);
+    throw error;
+  }
+};
+
 export const assignJob = async (jobId, studentId, token) => {
   try {
     const response = await axios.put(`${BASE_URL}/job/${jobId}/assign/${studentId}`, {}, {
