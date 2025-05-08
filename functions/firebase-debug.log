@@ -1,0 +1,62 @@
+[debug] [2025-05-08T08:43:45.790Z] ----------------------------------------------------------------------
+[debug] [2025-05-08T08:43:45.793Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Amir\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --only functions
+[debug] [2025-05-08T08:43:45.794Z] CLI Version:   14.3.0
+[debug] [2025-05-08T08:43:45.794Z] Platform:      win32
+[debug] [2025-05-08T08:43:45.794Z] Node Version:  v20.11.1
+[debug] [2025-05-08T08:43:45.794Z] Time:          Thu May 08 2025 18:43:45 GMT+1000 (Australian Eastern Standard Time)
+[debug] [2025-05-08T08:43:45.794Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-05-08T08:43:46.109Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-05-08T08:43:46.109Z] > authorizing via signed-in user (amir.amin2032@gmail.com)
+[info] i  emulators: Starting emulators: functions {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: functions"}}
+[debug] [2025-05-08T08:43:46.121Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-05-08T08:43:46.122Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[warn] !  emulators: It seems that you are running multiple instances of the emulator suite for project digital-skill-wallet. This may result in unexpected behavior. 
+[debug] [2025-05-08T08:43:46.130Z] [hub] writing locator at C:\Users\Amir\AppData\Local\Temp\hub-digital-skill-wallet.json
+[debug] [2025-05-08T08:43:46.165Z] [functions] Functions Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-05-08T08:43:46.166Z] [eventarc] Eventarc Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-05-08T08:43:46.166Z] [tasks] Cloud Tasks Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-05-08T08:43:46.166Z] late-assigned ports for functions and eventarc emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"functions":[{"address":"127.0.0.1","family":"IPv4","port":5001}],"eventarc":[{"address":"127.0.0.1","family":"IPv4","port":9299}],"tasks":[{"address":"127.0.0.1","family":"IPv4","port":9499}]},"metadata":{"message":"late-assigned ports for functions and eventarc emulators"}}
+[warn] !  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: apphosting, auth, firestore, database, hosting, pubsub, storage, dataconnect {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: \u001b[1mapphosting, auth, firestore, database, hosting, pubsub, storage, dataconnect\u001b[22m"}}
+[debug] [2025-05-08T08:43:46.197Z] defaultcredentials: writing to file C:\Users\Amir\AppData\Roaming\firebase\amir_amin2032_gmail.com_application_default_credentials.json
+[debug] [2025-05-08T08:43:46.200Z] Setting GAC to C:\Users\Amir\AppData\Roaming\firebase\amir_amin2032_gmail.com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Amir\\AppData\\Roaming\\firebase\\amir_amin2032_gmail.com_application_default_credentials.json"}}
+[debug] [2025-05-08T08:43:46.202Z] Checked if tokens are valid: false, expires at: 1746690225937
+[debug] [2025-05-08T08:43:46.202Z] Checked if tokens are valid: false, expires at: 1746690225937
+[debug] [2025-05-08T08:43:46.203Z] > refreshing access token with scopes: []
+[debug] [2025-05-08T08:43:46.206Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-05-08T08:43:46.206Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-05-08T08:43:46.514Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-05-08T08:43:46.514Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-05-08T08:43:46.525Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/digital-skill-wallet/adminSdkConfig [none]
+[debug] [2025-05-08T08:43:47.286Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/digital-skill-wallet/adminSdkConfig 200
+[debug] [2025-05-08T08:43:47.286Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/digital-skill-wallet/adminSdkConfig {"projectId":"digital-skill-wallet","storageBucket":"digital-skill-wallet.firebasestorage.app"}
+[info] i  functions: Watching "E:\QUT\Semester4\IFN711\web\711\functions" for Cloud Functions... {"metadata":{"emulator":{"name":"functions"},"message":"Watching \"E:\\QUT\\Semester4\\IFN711\\web\\711\\functions\" for Cloud Functions..."}}
+[debug] [2025-05-08T08:43:47.326Z] Validating nodejs source
+[debug] [2025-05-08T08:43:49.034Z] > [functions] package.json contents: {
+  "name": "functions",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "firebase-admin": "^13.3.0",
+    "firebase-functions": "^6.3.2",
+    "ipfs-http-client": "^56.0.3",
+    "multer": "^1.4.5-lts.2",
+    "mysql2": "^3.14.1"
+  },
+  "description": ""
+}
+[debug] [2025-05-08T08:43:49.035Z] Building nodejs source
+[debug] [2025-05-08T08:43:49.035Z] Failed to find version of module node: reached end of search path E:\QUT\Semester4\IFN711\web\711\functions\node_modules
+[warn] !  functions: Your requested "node" version "18" doesn't match your global version "20". Using node@20 from host. 
+[info] i  functions: Loaded environment variables from .env. 
+[debug] [2025-05-08T08:43:49.042Z] Could not find functions.yaml. Must use http discovery
+[debug] [2025-05-08T08:43:49.049Z] Found firebase-functions binary at 'E:\QUT\Semester4\IFN711\web\711\functions\node_modules\.bin\firebase-functions'

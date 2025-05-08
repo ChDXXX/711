@@ -1,0 +1,90 @@
+/* Container */
+.responsiveContainer {
+    width: 100%;
+    max-width: 100%;
+    padding: 24px 100px;
+  
+    @media (min-width: em(400px)) {
+      max-width: 400px;
+    }
+  
+    @media (min-width: em(600px)) {
+      max-width: 600px;
+    }
+  }
+
+.heading {
+  font-size: 20px ;
+  font-weight: 700;
+  color: var(--mantine-color-blue-light-color);
+}
+
+.headerPaper {
+  background-color: var(--mantine-color-blue-light-color) !important;
+  color: white;
+  padding: 8px 16px;
+}
+
+.headerTitle {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.headerSubtitle {
+  font-size: 16px;
+  font-weight: 400;
+  margin: 0;
+}
+
+.userButtonWrapper {
+  margin-left: auto;
+  transform: scale(1.5);
+  transform-origin: right;
+  overflow: hidden;
+}
+
+/* Charts */
+/* Base styles */
+.chartContainer {
+  width: 100%;
+  height: 300px;  /* You can adjust this based on the design */
+}
+
+/* For smaller screens */
+@media (max-width: 768px) {
+  .chart-container {
+    width: 100%;
+    height: 250px; 
+  }
+}
+
+/* Message Cards */
+.messageCard {
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.messageCard:hover {
+  background-color: #e0f0ff; /* light blue */
+  cursor: pointer;
+}
+
+/* Buttons */
+.actionButton.actionButton {
+  border: 1px solid var(--mantine-color-default-border) ;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: var(--mantine-color-blue-light); /* similar to variant="light" */
+  color: var(--mantine-color-blue-light-color); 
+  font-weight: 600;
+  font-size: 20px;
+  font-family: Arial, serif;
+  border-radius: 8px;
+  transition: background-color 0.2s ease-in-out;
+  height: 44px;
+}
+
+.actionButton.actionButton:hover {
+  background-color: var(--mantine-color-blue-light-color); /* slightly darker for hover */
+  color: white;
+}
