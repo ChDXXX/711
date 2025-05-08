@@ -19,6 +19,8 @@ import SchoolPage from "../pages/SchoolPage";
 import SchoolVerifySkill from '../pages/SchoolVerifySkill';
 
 import EmployerPage from "../pages/EmployerPage";
+import AddJobPage from "../pages/AddJobPage";
+import EditJobPage from "../pages/EditJobPage";
 import AdminPage from "../pages/AdminPage";
 import SyncUserDocPage from "../pages/SyncUserDocPage";
 import RedirectByRole from "../components/auth/RedirectByRole";
@@ -61,7 +63,12 @@ const AppRouter = createBrowserRouter([
 
 
       
-      {path: "employer", element: <EmployerPage />},
+      {path: "employer", 
+       element: <EmployerPage />,
+       children: [
+        {path: "add-job", element: <AddJobPage />},
+        { path: "edit-job/:jobId", element: <EditJobPage /> },
+       ]},
       {path: "admin", element: <AdminPage />},
       {path: "sync", element: <SyncUserDocPage />},
       {path: "redirect", element: <RedirectByRole />},
