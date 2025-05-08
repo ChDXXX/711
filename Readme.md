@@ -48,6 +48,7 @@ Firebase emulator:
     For save firebase seeds : firebase emulators:export ./firebase-seed
     Add "exportOnExit": true to firebase.json file
     Next time start data with firebase emulators:start --import=./firebase-seed --only auth,firestore,functions
+    Before exit run firebase seeds : firebase emulators:export ./firebase-seed to save latest data for later use
 
 pending
 smart-contracts:
