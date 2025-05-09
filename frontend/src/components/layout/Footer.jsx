@@ -1,4 +1,5 @@
 import { Anchor, Container, Group, Image } from '@mantine/core';
+import logo from '../../assets/Kanavoogle_logo.png';
 import classes from './Footer.module.css';
 
 const links = [

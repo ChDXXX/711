@@ -4,6 +4,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { useAuth } from '../../context/AuthContext';
 import { useFireStoreUser } from '../../hooks/useFirestoreUser';
 import classes from './Header.module.css';
+<<<<<<< HEAD
 import logo from '../../../public/Kanavoogle_logo.png';
 import UserMenu from './UserMenu';
 
@@ -11,6 +12,16 @@ const links = [
   { link: '/why-kanavoogle', label: 'Why Kanavoogle' },
   { link: '/products', label: 'Products' },
   { link: '/planning-advice', label: 'Planning & Advice' },
+=======
+import logo from '../../assets/Kanavoogle_logo.png';
+import UserMenu from './UserMenu';
+
+const links = [
+    { link: '/about', label: 'Why Kanavoogle?' },
+    { link: '/learn', label: 'Services' },
+    { link: '/pricing', label: 'Pricing' },
+    { link: '/community', label: 'Community' },
+>>>>>>> 0fdfa69a7 (UserButton.jsx, UserButton.css, Cardscroll.jsx, AlertBox.jsx, Barchart.jsx,)
 ];
 
 export default function Header() {
