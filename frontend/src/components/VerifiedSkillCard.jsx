@@ -1,10 +1,6 @@
 import React from "react";
 import { Card, Group, Text, Box, Rating, Checkbox } from "@mantine/core";
-<<<<<<< HEAD
 import classes from "../pages/DigitalSkillWallet.module.css";
-=======
-import classes from "../pages/HomePage.module.css";
->>>>>>> 0fdfa69a7 (UserButton.jsx, UserButton.css, Cardscroll.jsx, AlertBox.jsx, Barchart.jsx,)
 
 const VerifiedSkillCard = ({ skill, checked, onChange }) => {
   return (

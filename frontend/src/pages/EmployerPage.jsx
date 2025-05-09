@@ -176,7 +176,7 @@ const EmployerPage = () => {
         <Grid justify="center" gutter="lg">
 
           {/* Xi Xi */}
-          <Grid.Col>
+          <Grid.Col span={10}>
             <div>
               <h2>Employer Dashboard</h2>
               <p>Welcome, {user?.email}</p>
