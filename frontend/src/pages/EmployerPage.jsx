@@ -17,6 +17,7 @@ import ImagePaper from "./../components/ImagePaper";
 import ChartPaper from "./../components/ChartPaper";
 import CardScroll from "./../components/CardScroll";
 import StudentCarousel from "./../components/StudentCarousel";
+import PostJob_img from "../assets/post_job.jpg"
 import { Link } from "react-router-dom";
 
 const theme = createTheme({
@@ -175,7 +176,7 @@ const EmployerPage = () => {
         <Grid justify="center" gutter="lg">
 
           {/* Xi Xi */}
-          <Grid.Col>
+          <Grid.Col span={10}>
             <div>
               <h2>Employer Dashboard</h2>
               <p>Welcome, {user?.email}</p>
@@ -243,7 +244,7 @@ const EmployerPage = () => {
             description="Post your job and connect with talented students eager to grow."
             buttonText="Post a Job"
             buttonLink="/post-job"
-            imageUrl="post_job.jpg"
+            imageUrl={PostJob_img}
             />
           </Grid.Col>
 

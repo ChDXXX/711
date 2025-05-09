@@ -4,7 +4,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 // Frontend-Amir
-import { Container, Flex, Grid, MantineProvider, createTheme } from "@mantine/core";
+import { Container, Flex, Grid, Box, MantineProvider, createTheme } from "@mantine/core";
 import { IconActivity, IconBrandMessenger, IconBrandTeams, IconClipboardList, IconFilePlus } from "@tabler/icons-react";
 import cx from "clsx";
 import AlertBox from "./../components/AlertBox";
@@ -14,7 +14,7 @@ import PieChart from "./../components/PieChart";
 import SkillCard from "./../components/SkillCard";
 import VerifiedSkillCard from "./../components/VerifiedSkillCard";
 import NormButton from "./../components/common/NormButton";
-import classes from "./HomePage.module.css";
+import classes from "./DigitalSkillWallet.module.css";
 
 const theme = createTheme({
   components: {
@@ -155,11 +155,12 @@ const DigitalSkillWallet = () => {
   return (
     // Frontend-Amir
     <MantineProvider theme={theme}>
-        <Container size="responsive" bg="var(--mantine-color-white)">
+      <Box flex={1} mt="30px">
+        {/* <Container size="responsive" bg="var(--mantine-color-white)"> */}
           <Grid justify="center" gutter="xs">
 
             {/* Xi Xi */}
-            <Grid.Col>
+            <Grid.Col span={10}>
               <div style={{ padding: "20px" }}>
                 <h2>Student Profile</h2>
                 <p>Email: {email}</p>
@@ -282,7 +283,8 @@ const DigitalSkillWallet = () => {
               )}
             </Grid.Col>
           </Grid>
-        </Container>
+        {/* </Container> */}
+      </Box>
     </MantineProvider>
     // Frontend-Amir
   );
