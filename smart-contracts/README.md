@@ -44,6 +44,3 @@ npx hardhat run scripts/deploy.js
 Deploying with account is contract key
 
 port 8545 is the defate port for solidity and headhat.
-
-
-https://connect.openathens.net/igi-global.com/4e94e372-ca03-4c72-99a7-e60ba99529ef/auth/rcv/saml2/post
