@@ -46,18 +46,11 @@ const AppRouter = createBrowserRouter([
       children:[
         {index: true, element: <StudentHome />},
         {path: "request-skill", element: <StudentRequestSkill />},
-<<<<<<< HEAD
-        // {path: "profile", element: <StudentProfile />}, // Digital skill wallet
-      ]},      
-      
-    
-=======
         {path: "digital-skill-wallet", element: <DigitalSkillWallet />}, 
       ]},      
       
       
 
->>>>>>> main
       {path: "school",
        element: <SchoolPage />,
        children: [
