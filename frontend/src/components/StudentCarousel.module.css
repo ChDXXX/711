@@ -1,0 +1,54 @@
+.card {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background-size: cover;
+  background-position: center;
+}
+
+.title {
+    font-weight: 700;
+    font-size: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    cursor: default;
+    line-height: 1.2;
+    margin-top: var(--mantine-spacing-xs);
+  }
+  
+  .value {
+    font-weight: 500;
+    font-size: 20px;
+    font-family: 'Times New Roman', Times, serif;
+    /* text-transform: uppercase; */
+    cursor: default;
+    opacity: 0.7;
+  }
+  
+  .indicator {
+    width: 20px;
+    height: 4px;
+    transition: width 250ms ease;
+    border: 1px solid var(--mantine-color-blue-light-color) !important; 
+  
+    &[data-active] {
+      width: 40px;
+      background-color: var(--mantine-color-blue-light-color);
+      border-color:var(--mantine-color-blue-light-color) !important;  
+    }
+  }
+  
+  .control {
+    transition: opacity 150ms ease, background-color 150ms ease;
+    background-color:rgb(164, 213, 242) !important;
+  
+    /* Show hover background color */
+    &:hover {
+      background-color: var(--mantine-color-blue-light-color) !important;
+    }
+    &[data-inactive] {
+      opacity: 0;
+      cursor: default;
+    }
+  }
