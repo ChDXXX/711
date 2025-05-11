@@ -31,7 +31,7 @@ const router = express.Router();
  *
  * Status Workflow:
  * 1. Created → (status: "pending")
- * 2. Assigned → (studentId set, status remains "pending")
+ * 2. Assigned → (studentId set, status becomes "assigned")
  * 3. Student Accepts → (status: "accepted")
  * 4. Student Rejects → (status: "rejected")
  * 5. Student Completes → (status: "completed")
