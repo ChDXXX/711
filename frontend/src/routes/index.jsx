@@ -17,6 +17,7 @@ import DigitalSkillWallet from '../pages/student/DigitalSkillWallet';
 import SchoolPage from "../pages/school/SchoolPage";
 import SchoolHome from '../pages/school/SchoolHome';
 import SchoolVerifySkill from '../pages/school/SchoolVerifySkill';
+import SchoolCreateCourse from '../pages/school/SchoolCreateCourse';
 
 import EmployerPage from "../pages/employer/EmployerPage";
 import EmployerHome from '../pages/employer/EmployerHome';
@@ -58,6 +59,7 @@ const AppRouter = createBrowserRouter([
        children: [
         {index: true, element: <SchoolHome />},
         {path: "verify-skill", element: <SchoolVerifySkill />},
+        {path: "create-course", element: <SchoolCreateCourse />},
        ]},
   
       {path: "employer",

@@ -3,6 +3,7 @@ import { Container, Group, Box} from "@mantine/core";
 import { 
   IconHome2,
   IconFileCheck,
+  IconLayoutGridAdd,
   IconSettings,
   } from '@tabler/icons-react';
 import { useNavigate, Outlet } from "react-router-dom";
@@ -20,6 +21,7 @@ const SchoolPage = () => {
   const navbarData = [
     { link: '.', label: 'Home', icon: IconHome2 },
     { link: 'verify-skill', label: 'Verify Skills', icon: IconFileCheck },
+    { link: 'create-course', label: 'Create Course', icon: IconLayoutGridAdd },
     { link: '', label: 'Settings', icon: IconSettings },
 ];
 
