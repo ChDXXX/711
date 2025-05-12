@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import { Box } from "@mantine/core";
-import SkillVerifyList from "../components/SkillVerifyList"
-import SkillVerifyModal from "../components/SkillVerifyModal";
+import SkillVerifyList from "../../components/SkillVerifyList"
+import SkillVerifyModal from "../../components/SkillVerifyModal";
 
 
 export default function SchoolVerifySkill() {

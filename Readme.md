@@ -12,42 +12,15 @@ Functions
 #4. npm install ipfs-http-client@56.0.3
 #5. firebase emulators:start
 
-
 Frontend
-#1. npm init -y
-#2. npm install firebase axios ethers react-router-dom firebase-tools ethers
-#3. npm install @mantine/core @mantine/hooks @tabler/icons-react
+#1. npm init -y  
+#2. npm install react react-dom firebase axios ethers react-router-dom dayjs echarts-for-react prop-types  
+#3. npm install @mantine/core@8.0.0 @mantine/hooks@8.0.0 @mantine/carousel@8.0.0 @tabler/icons-react  
+#4. npm install -D vite@6.2.6 @vitejs/plugin-react
 
 how to run：
-#1. back to ddigital-skill-wallet run code:firebase emulators:start --only functions
+#1. back to ddigital-skill-wallet run code: firebase emulators:start --only functions
 #2. cd to frontend run: npm run dev
-
-
-How to use Firestore and Firebase Auth in local development :
-    in /frontend/src/firebase.js 
-        Add these lines on the top:
-            import { getAuth, connectAuthEmulator } from "firebase/auth";
-            import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
-
-        Add these lines before export :
-
-            if (location.hostname === "localhost") {
-                connectAuthEmulator(auth, "http://localhost:9099");
-                connectFirestoreEmulator(db, "localhost", 8080);
-            }
-
-    Still we can use non local Firebase (Auth, Firestore) by commenting these lines :
-
-            if (location.hostname === "localhost") {
-                connectAuthEmulator(auth, "http://localhost:9099");
-                connectFirestoreEmulator(db, "localhost", 8080);
-            }
-
-Firebase emulator:
-    Start the emulator from the root :   firebase emulators:start --only auth,firestore,functions
-    For save firebase seeds : firebase emulators:export ./firebase-seed
-    Add "exportOnExit": true to firebase.json file
-    Next time start data with firebase emulators:start --import=./firebase-seed --only auth,firestore,functions
 
 pending
 smart-contracts:
@@ -55,11 +28,5 @@ cd smart-contracts
 #1 npm install --save-dev hardhat solc
 #2 npm install @openzeppelin/contracts
 #3 npx hardhat compile
-#4 npx hardhat node        (#4 and #5 should be run at the same time, keep this running)
+#4 npx hardhat node (#4 and #5 should be run at the same time, keep this running)
 #5 npx hardhat run scripts/deploy.js --network localhost (and open a new terminal to run this line)
-
-
-
-
-
-

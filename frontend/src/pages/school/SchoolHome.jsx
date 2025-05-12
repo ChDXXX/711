@@ -1,14 +1,14 @@
-import { Box, Title, SimpleGrid, Group, Text } from "@mantine/core";
+import React from "react";
+import { Box, SimpleGrid, Title, Text, Group} from "@mantine/core";
 
-import { useAuth } from "../context/AuthContext";
-import { useFireStoreUser } from "../hooks/useFirestoreUser";
+import { useAuth } from "../../context/AuthContext";
+import { useFireStoreUser } from "../../hooks/useFirestoreUser";
 
-import Notification from "../components/Notification"
-import StatusOverview from "../components/StatusOverview"
-import ActivityList from "../components/ActivityList";
-import UserTable from "../components/UserTable";
+import Notification from "../../components/Notification"
+import UserTable from "../../components/UserTable";
+import ActivityList from "../../components/ActivityList";
 
-export default function StudentHome(){
+export default function SchoolHome(){
 
   const { user, role } = useAuth();
   const { userData, isLoading } = useFireStoreUser(user);
@@ -41,8 +41,8 @@ export default function StudentHome(){
     },
   ];
 
-  // My teacher list
-  const teacherList = [
+  // My student list
+  const studentList = [
     {
       avatar: 'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-9.png',
       name: 'Alice Johnson',
@@ -80,31 +80,28 @@ export default function StudentHome(){
     },
   ];
 
-  return(
+  return (
     <Box flex={1} mt="30px">
       <Group>
         <Title order={2}>Welcome back, {userData?.name} </Title>
         <Text mt="10px" c="gray">{userData?.schoolId?.toUpperCase()} · {userData?.role}</Text>
       </Group>
-
+      
       <Notification
-        count={2}
-        label="approved skills"
+        count={5}
+        label="skill submissions"
         messagePrefix="You currently have"
-        messageSuffix="pending review."
+        messageSuffix="ready for review and certification."
       />
-
-      <StatusOverview />
 
       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
         <ActivityList 
         courseData={courseData}/>
         <UserTable 
-        title="My Teachers"
-        data={teacherList}/>
+        title="My Students"
+        data={studentList}/>
       </SimpleGrid>
 
-    </Box> 
-  )
-
-}
+    </Box>
+  );
+};

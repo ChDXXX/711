@@ -8,21 +8,21 @@ import {
   } from '@tabler/icons-react';
 import { Navigate, Outlet } from "react-router-dom";  
 
-import { useAuth } from "../context/AuthContext";
-import { useFireStoreUser } from "../hooks/useFirestoreUser";
+import { useAuth } from "../../context/AuthContext";
+import { useFireStoreUser } from "../../hooks/useFirestoreUser";
 
-import HomeNavbar from "../components/HomeNavbar";
+import HomeNavbar from "../../components/HomeNavbar";
 
-const StudentPage = () => {
+const EmployerPage = () => {
   
   const { user, role } = useAuth();
   const { userData, isLoading } = useFireStoreUser(user);
 
-  if (!user || role !== "student") return <Navigate to="/" />;
+  if (!user || role !== "employer") return <Navigate to="/" />;
 
   const navbarData = [
     { link: '.', label: 'Home', icon: IconHome2 },
-    { link: 'request-skill', label: 'Request Skill', icon: IconClipboardList },
+    { link: 'request-skill', label: 'Post Jobs', icon: IconClipboardList },
     { link: '', label: 'Settings', icon: IconSettings },
   ];
 
@@ -43,4 +43,4 @@ const StudentPage = () => {
   );
 };
 
-export default StudentPage;
+export default EmployerPage;

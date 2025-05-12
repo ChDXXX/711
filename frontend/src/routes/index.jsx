@@ -9,22 +9,25 @@ import Register from '../pages/Register';
 import UnauthorizedPage from '../pages/Unauthorized';
 import WhyKanavoogle from '../pages/WhyKanavoogle';
 
-import StudentPage from "../pages/StudentPage";
-import StudentHome from '../pages/StudentHome';
-import StudentRequestSkill from '../pages/StudentRequestSkill';
-import DigitalSkillWallet from '../pages/DigitalSkillWallet';
+import StudentPage from "../pages/student/StudentPage";
+import StudentHome from '../pages/student/StudentHome';
+import StudentRequestSkill from '../pages/student/StudentRequestSkill';
+import DigitalSkillWallet from '../pages/student/DigitalSkillWallet';
 
-import SchoolPage from "../pages/SchoolPage";
+import SchoolPage from "../pages/school/SchoolPage";
+import SchoolHome from '../pages/school/SchoolHome';
+import SchoolVerifySkill from '../pages/school/SchoolVerifySkill';
+import SchoolCreateCourse from '../pages/school/SchoolCreateCourse';
 
-import SchoolVerifySkill from '../pages/SchoolVerifySkill';
+import EmployerPage from "../pages/employer/EmployerPage";
+import EmployerHome from '../pages/employer/EmployerHome';
 
-import EmployerPage from "../pages/EmployerPage";
 import AdminPage from "../pages/AdminPage";
 import SyncUserDocPage from "../pages/SyncUserDocPage";
 import RedirectByRole from "../components/auth/RedirectByRole";
 
 import ErrorPage from '../pages/ErrorPage';
-import SchoolHome from '../pages/SchoolHome';
+
 
 
 
@@ -46,22 +49,26 @@ const AppRouter = createBrowserRouter([
       children:[
         {index: true, element: <StudentHome />},
         {path: "request-skill", element: <StudentRequestSkill />},
-        {path: "digital-skill-wallet", element: <DigitalSkillWallet />}, 
-      ]},      
-      
-      
+         
+      ]},
 
+      {path: "digital-skill-wallet", element: <DigitalSkillWallet />},    
+      
       {path: "school",
        element: <SchoolPage />,
        children: [
         {index: true, element: <SchoolHome />},
         {path: "verify-skill", element: <SchoolVerifySkill />},
+        {path: "create-course", element: <SchoolCreateCourse />},
        ]},
-
-
+  
+      {path: "employer",
+       element: <EmployerPage />,
+       children:[
+        {index: true, element: <EmployerHome />},
+      ]},
 
       
-      {path: "employer", element: <EmployerPage />},
       {path: "admin", element: <AdminPage />},
       {path: "sync", element: <SyncUserDocPage />},
       {path: "redirect", element: <RedirectByRole />},

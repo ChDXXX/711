@@ -3,14 +3,15 @@ import { Container, Group, Box} from "@mantine/core";
 import { 
   IconHome2,
   IconFileCheck,
+  IconLayoutGridAdd,
   IconSettings,
   } from '@tabler/icons-react';
 import { useNavigate, Outlet } from "react-router-dom";
 
-import { useAuth } from "../context/AuthContext";
-import { useFireStoreUser } from "../hooks/useFirestoreUser";
+import { useAuth } from "../../context/AuthContext";
+import { useFireStoreUser } from "../../hooks/useFirestoreUser";
 
-import HomeNavbar from "../components/HomeNavbar";
+import HomeNavbar from "../../components/HomeNavbar";
 
 const SchoolPage = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const SchoolPage = () => {
   const navbarData = [
     { link: '.', label: 'Home', icon: IconHome2 },
     { link: 'verify-skill', label: 'Verify Skills', icon: IconFileCheck },
+    { link: 'create-course', label: 'Create Course', icon: IconLayoutGridAdd },
     { link: '', label: 'Settings', icon: IconSettings },
 ];
 
