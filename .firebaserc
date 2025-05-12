@@ -1,7 +1,5 @@
 {
   "projects": {
-    "digital-skill-wallet": "digital-skill-wallet"
-  },
-  "targets": {},
-  "etags": {}
+    "default": "digital-skill-wallet"
+  }
 }

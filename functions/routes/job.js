@@ -25,13 +25,13 @@ const router = express.Router();
  * - skills: array of strings
  * - employerId: string (UID of the employer)
  * - studentId: string (UID of the assigned student, nullable)
- * - status: string ("pending", "accepted", "rejected", "completed")
+ * - status: string ("pending", "assigned", "accepted", "rejected", "completed")
  * - verified: boolean (true if employer verifies completion)
  * - createdAt: timestamp
  *
  * Status Workflow:
  * 1. Created → (status: "pending")
- * 2. Assigned → (studentId set, status remains "pending")
+ * 2. Assigned → (studentId set, status becomes "assigned")
  * 3. Student Accepts → (status: "accepted")
  * 4. Student Rejects → (status: "rejected")
  * 5. Student Completes → (status: "completed")
@@ -70,6 +70,7 @@ router.get("/:jobId", verifyToken, async (req, res) => {
 
     const job = jobDoc.data();
 
+    // Authorization
     if (role === "employer" && job.employerId !== uid) {
       return res.status(403).send("You do not own this job");
     }
@@ -78,17 +79,35 @@ router.get("/:jobId", verifyToken, async (req, res) => {
       return res.status(403).send("You are not assigned to this job");
     }
 
-    res.status(200).json({ id: jobDoc.id, ...job });
+    let assignedUser = null;
+
+    // ✅ If job is assigned (i.e., not pending), fetch assigned student info
+    if (job.status !== 'pending' && job.studentId) {
+      const studentDoc = await admin.firestore().doc(`users/${job.studentId}`).get();
+      if (studentDoc.exists) {
+        assignedUser = { id: studentDoc.id, ...studentDoc.data() };
+      }
+    }
+
+    // ✅ Include assignedUser in response if available
+    res.status(200).json({
+      id: jobDoc.id,
+      ...job,
+      assignedUser,
+    });
+
   } catch (error) {
     console.error("Error fetching job:", error.message);
     res.status(500).send("Failed to retrieve job");
   }
 });
 
+
 // POST /job
 router.post("/", verifyToken, async (req, res) => {
   const { title, description, price, location, skills } = req.body;
   const { uid, role } = req.user;
+
 
   if (role !== "employer") return res.status(403).send("Only employers can create jobs");
 
@@ -104,7 +123,7 @@ router.post("/", verifyToken, async (req, res) => {
       location,
       skills,
       employerId: uid,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: new Date().toISOString(),
       status: "pending",
       verified: false
     });
@@ -128,13 +147,33 @@ router.get("/", verifyToken, async (req, res) => {
         : query.where("studentId", "==", uid)
     ).orderBy("createdAt", "desc").get();
 
-    const jobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const jobs = await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const job = { id: doc.id, ...doc.data() };
+        // ✅ If assigned and not pending, fetch the assigned user's info
+        if (job.studentId && job.status !== 'pending') {
+          
+          try {
+            const studentDoc = await admin.firestore().doc(`users/${job.studentId}`).get();
+            if (studentDoc.exists) {
+              job.assignedUser = { id: studentDoc.id, ...studentDoc.data() };
+            }
+          } catch (err) {
+            console.error(`Failed to fetch student ${job.studentId}:`, err.message);
+          }
+        }
+
+        return job;
+      })
+    );
+
     res.json(jobs);
   } catch (error) {
     console.error("Error fetching jobs:", error.message);
     res.status(500).send("Failed to retrieve jobs");
   }
 });
+
 
 // PUT /employer/job/:jobId
 router.put("/:jobId", verifyToken, async (req, res) => {
@@ -175,7 +214,8 @@ router.put("/:jobId/assign/:studentId", verifyToken, async (req, res) => {
       return res.status(404).send("Student not found");
     }
 
-    await jobDoc.ref.update({ studentId });
+    await jobDoc.ref.update({ studentId, status: "assigned" });
+    
     res.status(200).send("Job assigned successfully");
   } catch (error) {
     console.error("Assignment error:", error.message);
