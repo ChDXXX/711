@@ -4,7 +4,7 @@ import admin from "firebase-admin";
 const router = express.Router();
 const FieldValue = admin.firestore?.FieldValue ?? null;
 
-// Middleware: Verify token and attach user info
+// Middleware: 验证登录状态并附加用户信息
 async function verifyToken(req, res, next) {
   const idToken = req.headers.authorization?.split("Bearer ")[1];
   if (!idToken) return res.status(401).send("Unauthorized");
@@ -25,37 +25,83 @@ async function verifyToken(req, res, next) {
   }
 }
 
-// POST /skill/add — Add a new skill (student only)
+// POST /skill/add — 学生提交技能
 router.post("/add", verifyToken, async (req, res) => {
-    const { role, uid } = req.user;
-    const { courseId, attachmentCid, level } = req.body;
+  const { role, uid } = req.user;
+  const { courseId, attachmentCid, level } = req.body;
 
     if (role !== "student") return res.status(403).send("Only students can add skills");
     if (!courseId) return res.status(400).send("Missing courseId");
 
-    try {
-        // 获取课程信息
-        const courseDoc = await admin.firestore().collection("courses").doc(courseId).get();
-        if (!courseDoc.exists) return res.status(404).send("Course not found");
+  try {
+    // 获取学生信息并验证 major
+    const userDoc = await admin.firestore().doc(`users/${uid}`).get();
+    const userData = userDoc.data();
+    if (!userData.major) {
+      return res.status(400).send("You must set your major before submitting a skill.");
+    }
 
-        const courseData = courseDoc.data();
-        const skillTemplate = courseData.skillTemplate || {};
+    // 获取课程数据
+    const courseRef = admin.firestore().doc(`courses/${courseId}`);
+    const courseDoc = await courseRef.get();
+    if (!courseDoc.exists) return res.status(404).send("Course not found");
 
-        const docRef = await admin.firestore().collection("skills").add({
-            ownerId: uid,
-            courseId: courseId,
-            courseCode: courseData.code || "",
-            courseTitle: courseData.title || "",
-            title: skillTemplate.skillTitle || "",
-            description: skillTemplate.skillDescription || "",
-            level: level || skillTemplate.level || "Beginner",
-            attachmentCid: attachmentCid || "",
-            verified: null,
-            reviewedBy: null,
-            reviewedAt: null,
-            note: "",
-            createdAt: FieldValue ? FieldValue.serverTimestamp() : new Date().toISOString(),
-        });
+    const courseData = courseDoc.data();
+    const skillTemplate = courseData.skillTemplate || {};
+    const isSoftCourse = !Array.isArray(courseData.techTags) || courseData.techTags.length === 0;
+
+    // 校验软技能
+    if (isSoftCourse) {
+      if (!Array.isArray(softSkills) || softSkills.length !== 5) {
+        return res.status(400).send("You must select exactly 5 soft skills.");
+      }
+      for (const item of softSkills) {
+        if (typeof item !== "object" || !item.type || typeof item.type !== "string") {
+          return res.status(400).send("Invalid soft skill format.");
+        }
+      }
+    }
+
+    // 是否为首次提交
+    const existingSnap = await admin.firestore()
+      .collection("skills")
+      .where("courseId", "==", courseId)
+      .where("ownerId", "==", uid)
+      .get();
+
+    const isFirstSubmission = existingSnap.empty;
+
+    // 构建技能文档
+    const newSkill = {
+      ownerId: uid,
+      courseId,
+      courseCode: courseData.code || "",
+      courseTitle: courseData.title || "",
+      schoolId: courseData.schoolId || "",
+      major: courseData.major || "",
+      title: skillTemplate.skillTitle || "",
+      description: skillTemplate.skillDescription || "",
+      level: level || "Beginner",
+      attachmentCid: attachmentCid || "",
+      verified: "pending",
+      reviewedBy: null,
+      reviewedAt: null,
+      note: "",
+      score: null,
+      techTags: courseData.techTags || [],
+      softSkills: isSoftCourse ? softSkills : [],
+      techSkills: [], // 初始化空，后续老师评分使用
+      createdAt: FieldValue ? FieldValue.serverTimestamp() : new Date().toISOString(),
+    };
+
+    const docRef = await admin.firestore().collection("skills").add(newSkill);
+
+    // 如果是首次提交，则更新课程学生计数
+    if (isFirstSubmission) {
+      await courseRef.update({
+        studentCount: FieldValue.increment(1),
+      });
+    }
 
         res.status(201).send({ id: docRef.id });
     } catch (error) {
@@ -64,7 +110,7 @@ router.post("/add", verifyToken, async (req, res) => {
     }
 });
 
-// GET /skill/list — List skills (self for student, any for teacher/admin)
+// GET /skill/list — 学生查看所有提交的技能
 router.get("/list", verifyToken, async (req, res) => {
   const { uid, role } = req.user;
   const targetUid = req.query.uid || uid;

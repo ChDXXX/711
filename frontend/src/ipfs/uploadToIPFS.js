@@ -18,6 +18,6 @@ export async function uploadToIPFS(file) {
   }
 
   const data = await res.json();
-  console.log("✅ Uploaded to Pinata:", data);
+  console.log(" Uploaded to Pinata:", data);
   return data.IpfsHash;
 }

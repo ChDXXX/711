@@ -30,8 +30,8 @@ async function verifyStudent(req, res, next) {
 
 // GET /student/me
 router.get("/me", verifyStudent, (req, res) => {
-  const { uid, email, customUid, schoolId, role } = req.user;
-  res.json({ uid, email, customUid, schoolId, role });
+  const { uid, email, customUid, schoolId, role, major } = req.user;
+  res.json({ uid, email, customUid, schoolId, role, major });
 });
 
 // GET /student/skills
@@ -70,6 +70,54 @@ router.put("/update-school", verifyStudent, async (req, res) => {
   } catch (error) {
     console.error("Error updating school:", error);
     res.status(500).send("Failed to update school.");
+  }
+});
+
+// GET /student/list-courses
+router.get("/list-courses", verifyStudent, async (req, res) => {
+  try {
+    const schoolId = req.user.schoolId;
+
+    if (!schoolId) {
+      console.warn("Missing schoolId in student profile:", req.user);
+      return res.status(400).send("Missing schoolId in your profile.");
+    }
+
+    const snapshot = await admin.firestore().collection("courses").get();
+
+    const courses = snapshot.docs
+      .filter(doc => doc.data().schoolId === schoolId)
+      .map(doc => ({
+        id: doc.id,
+        title: doc.data().title,
+        code: doc.data().code,
+        skillTemplate: doc.data().skillTemplate,
+      }));
+
+    res.json(courses);
+  } catch (err) {
+    console.error("Failed to fetch student courses:", err);
+    res.status(500).send("Failed to load courses");
+  }
+});
+
+// PUT /student/update-major
+router.put("/update-major", verifyStudent, async (req, res) => {
+  const { uid } = req.user;
+  const { major } = req.body;
+
+  if (!major || typeof major !== "string") {
+    return res.status(400).send("Invalid major.");
+  }
+
+  try {
+    await admin.firestore().doc(`users/${uid}`).update({
+      major: major.trim(),
+    });
+    res.status(200).send("Major updated successfully.");
+  } catch (error) {
+    console.error("Error updating major:", error);
+    res.status(500).send("Failed to update major.");
   }
 });
 
