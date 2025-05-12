@@ -27,8 +27,8 @@ async function verifyToken(req, res, next) {
 
 // POST /skill/add — 学生提交技能
 router.post("/add", verifyToken, async (req, res) => {
-  const { role, uid } = req.user;
-  const { courseId, attachmentCid, level } = req.body;
+    const { role, uid } = req.user;
+    const { courseId, attachmentCid, level, softSkills } = req.body;
 
     if (role !== "student") return res.status(403).send("Only students can add skills");
     if (!courseId) return res.status(400).send("Missing courseId");
@@ -46,8 +46,8 @@ router.post("/add", verifyToken, async (req, res) => {
     const courseDoc = await courseRef.get();
     if (!courseDoc.exists) return res.status(404).send("Course not found");
 
-    const courseData = courseDoc.data();
-    const skillTemplate = courseData.skillTemplate || {};
+        const courseData = courseDoc.data();
+        const skillTemplate = courseData.skillTemplate || {};
     const isSoftCourse = !Array.isArray(courseData.techTags) || courseData.techTags.length === 0;
 
     // 校验软技能
