@@ -22,10 +22,6 @@ how to run：
 #1. back to ddigital-skill-wallet run code: firebase emulators:start --only functions
 #2. cd to frontend run: npm run dev
 
-<<<<<<< HEAD
-=======
-
->>>>>>> b27592e5c345d10317707c9979f106a3eb7438b4
 pending
 smart-contracts:
 cd smart-contracts
