@@ -19,9 +19,7 @@ import SchoolHome from '../pages/school/SchoolHome';
 import SchoolVerifySkill from '../pages/school/SchoolVerifySkill';
 import SchoolCreateCourse from '../pages/school/SchoolCreateCourse';
 
-import EmployerPage from "../pages/employer/EmployerPage";
-import EmployerHome from '../pages/employer/EmployerHome';
-
+import EmployerPage from "../pages/EmployerPage";
 import AdminPage from "../pages/AdminPage";
 import SyncUserDocPage from "../pages/SyncUserDocPage";
 import RedirectByRole from "../components/auth/RedirectByRole";
@@ -59,16 +57,12 @@ const AppRouter = createBrowserRouter([
        children: [
         {index: true, element: <SchoolHome />},
         {path: "verify-skill", element: <SchoolVerifySkill />},
-        {path: "create-course", element: <SchoolCreateCourse />},
        ]},
-  
-      {path: "employer",
-       element: <EmployerPage />,
-       children:[
-        {index: true, element: <EmployerHome />},
-      ]},
+
+
 
       
+      {path: "employer", element: <EmployerPage />},
       {path: "admin", element: <AdminPage />},
       {path: "sync", element: <SyncUserDocPage />},
       {path: "redirect", element: <RedirectByRole />},
