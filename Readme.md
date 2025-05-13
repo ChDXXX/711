@@ -19,7 +19,7 @@ Frontend
 #3. npm install @mantine/core @mantine/hooks @tabler/icons-react
 
 how to run：
-#1. back to ddigital-skill-wallet run code:firebase emulators:start --only functions
+#1. back to digital-skill-wallet run code:firebase emulators:start --only functions
 #2. cd to frontend run: npm run dev
 
 
@@ -32,7 +32,7 @@ cd smart-contracts
 #4 npx hardhat node        (#4 and #5 should be run at the same time, keep this running)
 #5 npx hardhat run scripts/deploy.js --network localhost (and open a new terminal to run this line)
 
-
+#6 Console test: npx hardhat console --network localhost
 
 
 

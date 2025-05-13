@@ -14,31 +14,10 @@ npx hardhat ignition deploy ./ignition/modules/Lock.js
 
 
 
-终端里面
-分配
-const [admin, student1, school1, company1] = await ethers.getSigners();
-const hs = await ethers.getContractAt("HashStorage", deployedAddress);
-
-await hs.grantRole(ethers.utils.id("STUDENT_ROLE"), student1.address);
-
-await hs.grantRole(ethers.utils.id("SCHOOL_ROLE"), school1.address);
-
-await hs.grantRole(ethers.utils.id("COMPANY_ROLE"), company1.address);
-
-
-
-储存学生的法系
-await contract.connect(student1).storeHash(hexHash);
-学生
-const myHashes = await contract.connect(student1).getHashes(student1.address);
-const studentHashes = await contract.connect(school1).getHashes(student1.address);
-
-
 
 Frontend/.env 
 
 npx hardhat node
-Private Key of each block
 
 npx hardhat run scripts/deploy.js
 Deploying with account is contract key
@@ -46,4 +25,18 @@ Deploying with account is contract key
 port 8545 is the defate port for solidity and headhat.
 
 
-https://connect.openathens.net/igi-global.com/4e94e372-ca03-4c72-99a7-e60ba99529ef/auth/rcv/saml2/post
+
+
+
+const skillWallet = await ethers.getContractAt(
+  "SkillWallet",
+  "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+)
+
+const hashStorage = await ethers.getContractAt(
+  "HashStorage",
+  "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+)
+
+
+"0xDace0bF9169D90bFec0446aEfb83f1128e6FBAe0"

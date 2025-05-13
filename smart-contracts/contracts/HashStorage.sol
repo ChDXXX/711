@@ -1,5 +1,6 @@
-// SPDX-License-Identifier: NOLICENSED
-pragma solidity ^0.8.28;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract HashStorage is AccessControl {
