@@ -6,6 +6,9 @@ import {
 } from "@mantine/core";
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import axios from "axios";
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebase';    
+import { formatCreatedAt } from '../../utils/date';
 import { useAuth } from "../../context/AuthContext";
 import { uploadToIPFS } from "../../ipfs/uploadToIPFS";
 import { listSkills } from "../../services/skillService";
@@ -59,9 +62,36 @@ function SkillReviewDetails({ skill, softSkillMap }) {
               </SimpleGrid>
             </Box>
           )}
+          <Box mt="sm">
+            <Title order={5} size="sm">Feedback</Title>
+            <Text>{skill.note || "N/A"}</Text>
+          </Box>
         </Collapse>
+
       </Box>
     );    
+  }
+  else if(skill.verified === 'rejected'){
+    return (
+      <Box mt="sm">
+        <Button
+          variant="subtle"
+          size="xs"
+          onClick={() => setOpened((o) => !o)}
+          rightSection={opened ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
+        >
+          {opened ? "Hide Details" : "Show Details"}
+        </Button>
+
+        <Collapse in={opened}>
+          <Box mt="sm">
+            <Title order={5} size="sm">Feedback</Title>
+            <Text>{skill.note || "N/A"}</Text>
+          </Box>
+        </Collapse>
+
+      </Box>
+    );   
   }
 }
 
@@ -80,15 +110,36 @@ export default function StudentRequestSkill() {
   const [softSkillMap, setSoftSkillMap] = useState({});
   const [selectedMajor, setSelectedMajor] = useState("");
   const [schoolId, setSchoolId] = useState(null);
-
+  const [teacherMap, setTeacherMap] = useState({});
   useEffect(() => {
     if (user) {
-      fetchStudentProfile();
-      fetchMajors();
-      fetchSoftSkills();
-      fetchSkills();
+      fetchStudentProfile()
+      fetchMajors()
+      fetchSoftSkills()
+      fetchSkills()
+      fetchTeachers()
     }
   }, [user]);
+
+const fetchTeachers = async () => {
+  if (!skills.length) return;                         // skills 还没来就先跳过
+  const token = await user.getIdToken();
+
+  // 拿出所有 reviewedBy 去重
+  const ids = [...new Set(skills.map(s => s.reviewedBy).filter(Boolean))];
+
+  // 并发请求
+  const list = await Promise.all(
+    ids.map(id =>
+      axios
+        .get(`${BASE_URL}/user/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => ({ id, name: r.data.name || r.data.email || id }))
+        .catch(() => ({ id, name: id }))              // 出错时退回 id
+    )
+  );
+  setTeacherMap(Object.fromEntries(list.map(i => [i.id, i.name])));
+};
+
 
   const fetchStudentProfile = async () => {
     try {
@@ -150,17 +201,17 @@ export default function StudentRequestSkill() {
     }
   };
 
-const handleDelete = async (id) => {
-  try {
-    const token = await user.getIdToken(); // 获取用户 token
-    await axios.delete(`${BASE_URL}/student/skill/delete/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    fetchSkills(); // 删除后刷新列表
-  } catch (err) {
-    console.error("Delete failed:", err);
-  }
-};
+  const handleDelete = async (id) => {
+    try {
+      const token = await user.getIdToken(); // 获取用户 token
+      await axios.delete(`${BASE_URL}/student/skill/delete/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchSkills(); // 删除后刷新列表
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
+  };
 
   const updateMajor = async () => {
     const token = await user.getIdToken();
@@ -193,6 +244,11 @@ const handleDelete = async (id) => {
       setLoading(false);
     }
   };
+    
+  async function fetchNameById(col, id) {
+    const snap = await getDoc(doc(db, col, id));
+    return snap.exists() ? snap.data().name ?? id : id;
+  }
 
   return (
     <Box flex={1} mt="30px">
@@ -232,54 +288,65 @@ const handleDelete = async (id) => {
                 <Text size="sm" mt="6px">{skill.level}</Text>                
               </Group>
 
-                <Box mt="xs" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" }}>
-                  {/* 左边的状态和技能 tags */}
-                  <Group spacing="xs" wrap="wrap">
-                    {skill.verified === "approved" ? (
-                      <Badge color="green" size="xs" radius="xl" variant="filled">APPROVED</Badge>
-                    ) : skill.verified === "rejected" ? (
-                      <Badge color="red" size="xs" radius="xl" variant="filled">REJECTED</Badge>
-                    ) : (
-                      <Badge color="gray" size="xs" radius="xl" variant="filled">PENDING</Badge>
-                    )}
+              <Group>
+                <Text fw={600} c="gray" size="sm">Request time: </Text>
+                <Text c="gray" size="12px">{formatCreatedAt(skill?.createdAt)}</Text>                
+              </Group>
+              <Group>
+                <Text fw={600} c="gray" size="sm">Reviewd time: </Text>
+                <Text c="gray" size="12px">{formatCreatedAt(skill?.reviewedAt)}</Text>
 
-                    {(skill.softSkills || []).map((sid, i) => (
-                      <Badge key={i} variant="light" color="blue" size="xs">
-                        {softSkillMap[sid] || sid}
-                      </Badge>
-                    ))}
-                  </Group>
+                {(skill.verified === 'approved' || skill.verified === 'rejected') && 
+                <>
+                <Text fw={600} c="gray" size="sm">Reviewd by: </Text>
+                <Text c="gray" size="12px">{teacherMap[skill.reviewedBy]}</Text>
+                </>}                
+              </Group>
 
-                  {/* 右边的查看附件&删除按钮 */}
-                  <Group>
-                    <Button
-                      size="xs"
-                      color="blue"
-                      variant="light"
-                      onClick={() => {
-                        if (skill.attachmentCid) {
-                          window.open(`https://ipfs.io/ipfs/${skill.attachmentCid}`, '_blank');
-                        } else {
-                          alert("No attachment available");
-                        }
-                      }}
-                    >
-                      {t("request.viewFile")}
-                    </Button>
-                    <Button
-                      size="xs"
-                      color="red"
-                      variant="light"
-                      onClick={() => handleDelete(skill.id)}
-                    >
-                      {t("request.delete")}
-                    </Button>   
-                  </Group>
+              <Box mt="xs" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" }}>
+                {/* 左边的状态和技能 tags */}
+                <Group spacing="xs" wrap="wrap">
+                  {skill.verified === "approved" ? (
+                    <Badge color="green" size="xs" radius="xl" variant="filled">APPROVED</Badge>
+                  ) : skill.verified === "rejected" ? (
+                    <Badge color="red" size="xs" radius="xl" variant="filled">REJECTED</Badge>
+                  ) : (
+                    <Badge color="gray" size="xs" radius="xl" variant="filled">PENDING</Badge>
+                  )}
 
-                
-                </Box>
 
-                <SkillReviewDetails skill={skill} softSkillMap={softSkillMap} />
+                </Group>
+
+                {/* 右边的查看附件&删除按钮 */}
+                <Group>
+                  <Button
+                    size="xs"
+                    color="blue"
+                    variant="light"
+                    onClick={() => {
+                      if (skill.attachmentCid) {
+                        window.open(`https://ipfs.io/ipfs/${skill.attachmentCid}`, '_blank');
+                      } else {
+                        alert("No attachment available");
+                      }
+                    }}
+                  >
+                    {t("request.viewFile")}
+                  </Button>
+                  <Button
+                    size="xs"
+                    color="red"
+                    variant="light"
+                    onClick={() => handleDelete(skill.id)}
+                  >
+                    {t("request.delete")}
+                  </Button>   
+                </Group>
+
+              
+              </Box>
+
+              <SkillReviewDetails skill={skill} softSkillMap={softSkillMap} />
 
               </Box>
             ))}          

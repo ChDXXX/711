@@ -45,7 +45,6 @@ export default function StudentProfile(props) {
 
           {/* 中间信息 */}
           <Box sx={{ flex: 1 }}>
-            <Title order={3}>{t("profile.title")}</Title>
             <Text size="sm" c="dimmed" mb="xs">
               {t("profile.id")}: {props.userData?.customUid || "N/A"}
             </Text>

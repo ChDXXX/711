@@ -374,6 +374,7 @@
     "pendingSkillsMessage": "你有 {{count}} 项技能正在审核中"
   },
   "notification":{
-    "check": "查看我的技能申请历史。"
+    "studentCheck": "查看我的技能申请历史。",
+    "schoolCheck": "查看待审批的技能请求。"
   }
 }

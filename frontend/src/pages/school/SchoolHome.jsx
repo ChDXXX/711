@@ -94,6 +94,7 @@ export default function SchoolHome() {
           </Group>
 
           <Notification
+            userType={userData?.role}
             count={pendingSkillCount}
             label={t("school.skillLabel")}
             messagePrefix={t("school.reviewPrefix")}
@@ -102,7 +103,7 @@ export default function SchoolHome() {
 
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
             <ActivityList courseList={courseList} onClickMore={() => navigate('/school/manage-courses')}/>
-            <UserTable title={t("school.myStudents")} data={studentList} />
+            <UserTable title={t("school.myStudents")} studentList={studentList} />
           </SimpleGrid>
         </>
       )}

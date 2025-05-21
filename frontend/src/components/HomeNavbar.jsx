@@ -110,7 +110,7 @@ export default function HomeNavbar(props) {
                 href={'profile'}
                 onClick={(event) => {
                   event.preventDefault();
-                  navigate('/digital-skill-wallet');
+                  navigate(`/digital-skill-wallet/${props.userData?.customUid}`);
                 }}
               >
                 <Group justify="space-between" align="center" w="100%">
