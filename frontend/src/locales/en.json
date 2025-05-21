@@ -374,6 +374,7 @@
     "pendingSkillsMessage": "You have {{count}} skill(s) pending"
   },
   "notification":{
-    "check": "Check my request history."
+    "studentCheck": "View my skill request history.",
+    "schoolCheck": "Check pending skill requests."
   }
 }

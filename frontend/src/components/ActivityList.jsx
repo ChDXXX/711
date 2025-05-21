@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 export default function ActivityList(props) {
   const { t } = useTranslation();
+  const displayList = props.courseList.slice(0, 4);
 
   return (
     <Box w="100%" mb="50px" px="sm">
@@ -14,7 +15,7 @@ export default function ActivityList(props) {
             </Button>
         </Group>
 
-        {props.courseList.map((course) => (
+        {displayList.map((course) => (
           <Paper key={course.id} withBorder p="md" radius="md" style={{ width: "100%" }}>
             <Group justify="space-between" align="center">
               <div>

@@ -67,7 +67,7 @@ const AppRouter = createBrowserRouter([
         { path: "applications", element: <MyJobApplications /> },   // 加入
       ]
     },
-    { path: "digital-skill-wallet", element: <DigitalSkillWallet /> },
+    { path: "digital-skill-wallet/:studentId", element: <DigitalSkillWallet /> },
 
       // School routes
   {

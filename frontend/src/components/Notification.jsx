@@ -32,9 +32,20 @@ export default function Notification({ count = 0, label = "items", messagePrefix
           navigate('/student/request-skill');
         }}
       >
-        {t("notification.check")}
+        {t("notification.studentCheck")}
       </Anchor>}
 
+      {userType === 'school' &&       
+      <Anchor
+        fw={600}
+        c="blue"
+        onClick={(e) => {
+          e.preventDefault();
+          navigate('/school/verify-skill');
+        }}
+      >
+        {t("notification.schoolCheck")}
+      </Anchor>}
     </Group>
 
         </Group>
