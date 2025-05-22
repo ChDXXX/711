@@ -7,7 +7,6 @@ import Layout from '../components/layout/Layout';
 import HomePage from '../pages/HomePage';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
-import UnauthorizedPage from '../pages/Unauthorized';
 import WhyKanavoogle from '../pages/WhyKanavoogle';
 import Services from '../pages/Services'
 import ErrorPage from '../pages/ErrorPage';
@@ -37,11 +36,6 @@ import JobManagement from '../pages/employer/JobManagement';
 import AddJobPage from "../pages/employer/AddJobPage";
 import EditJobPage from "../pages/employer/EditJobPage";
 
-// Admin
-import AdminPage from "../pages/AdminPage";
-import SyncUserDocPage from "../pages/SyncUserDocPage";
-
-
 const AppRouter = createBrowserRouter([
   {
     path: "/",
@@ -50,7 +44,6 @@ const AppRouter = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: "register", element: <Register /> },
       { path: "login", element: <Login /> },
-      { path: "unauthorized", element: <UnauthorizedPage /> },
       { path: "why-kanavoogle", element: <WhyKanavoogle /> },
       { path: "services", element: <Services /> },
 
@@ -67,39 +60,33 @@ const AppRouter = createBrowserRouter([
         { path: "applications", element: <MyJobApplications /> },   // 加入
       ]
     },
+
     { path: "digital-skill-wallet/:customId", element: <DigitalSkillWallet /> },
 
       // School routes
-  {
-    path: "school",
-    element: <SchoolPage />,
-    children: [
-      { index: true, element: <SchoolHome /> },
-      { path: "verify-skill", element: <SchoolVerifySkill /> },
-      { path: "manage-courses", element: <SchoolCourseManager /> }, 
-      { path: "settings", element: <SchoolSettings /> }, // 现在不会跳 ErrorPage 了
-    ]
-  },  
+    {
+      path: "school",
+      element: <SchoolPage />,
+      children: [
+        { index: true, element: <SchoolHome /> },
+        { path: "verify-skill", element: <SchoolVerifySkill /> },
+        { path: "manage-courses", element: <SchoolCourseManager /> }, 
+        { path: "settings", element: <SchoolSettings /> }, // 现在不会跳 ErrorPage 了
+      ]
+    },  
 
-
-      {
-        path: "employer",
-        element: <EmployerPage />,
-        children: [
-            { index: true, element: <EmployerHome /> },
-            { path: "jobs-list", element: <JobManagement /> },
-            { path: "add-job", element: <AddJobPage /> },
-            { path: "edit-job/:jobId", element: <EditJobPage /> }
-        ]
-      },
-
-
-      // Admin & Utility
-      { path: "admin", element: <AdminPage /> },
-      { path: "sync", element: <SyncUserDocPage /> },
-
-      // Fallback
-      { path: "*", element: <ErrorPage /> }
+    {
+      path: "employer",
+      element: <EmployerPage />,
+      children: [
+          { index: true, element: <EmployerHome /> },
+          { path: "jobs-list", element: <JobManagement /> },
+          { path: "add-job", element: <AddJobPage /> },
+          { path: "edit-job/:jobId", element: <EditJobPage /> }
+      ]
+    },
+    
+    { path: "*", element: <ErrorPage /> }
     ]
   }
 ]);

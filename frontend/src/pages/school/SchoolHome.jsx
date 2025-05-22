@@ -11,7 +11,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 
 import Notification from "../../components/Notification";
 import UserTable from "../../components/UserTable";
-import ActivityList from "../../components/ActivityList";
+import CourseList from "../../components/CourseList";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -102,7 +102,7 @@ export default function SchoolHome() {
           />
 
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-            <ActivityList courseList={courseList} onClickMore={() => navigate('/school/manage-courses')}/>
+            <CourseList courseList={courseList} onClickMore={() => navigate('/school/manage-courses')}/>
             <UserTable title={t("school.myStudents")} studentList={studentList} />
           </SimpleGrid>
         </>

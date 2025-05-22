@@ -1,7 +1,7 @@
 import { Box, Title, Paper, Text, Group, Button, Badge, Stack } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 
-export default function ActivityList(props) {
+export default function CourseList(props) {
   const { t } = useTranslation();
   const displayList = props.courseList.slice(0, 4);
 
