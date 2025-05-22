@@ -17,9 +17,6 @@
   },
   "wallet": {
     "selectSkillTitle": "选择技能以查看评分",
-    "overallScoreSummary": "综合评分概览",
-    "softSkillScores": "软技能评分",
-    "hardSkillScores": "硬技能评分",
     "myVerifiedSkills": "我的已认证技能",
     "graduationReminderTitle": "毕业提醒",
     "graduationReminderMessage": "毕业后，你的学校邮箱将被停用。请使用个人邮箱登录！",
@@ -30,7 +27,11 @@
     "course": "课程",
     "verifiedBy": "审核人",
     "score": "评分",
-    "visibleToEmployer": "向雇主公开"
+    "visibleToEmployer": "向雇主公开",
+    "skillsOverview":"已验证技能",
+    "chartsOverview":"技能概览",
+    "peiChart": "技能水平分布",
+    "barChart": "软技能频次"
   },
   "home": {
     "welcome": "欢迎回来",
@@ -287,7 +288,7 @@
     "invalidRole": "分配的角色无效"
   },
   "register": {
-    "title": "欢迎加入 Skivy！",
+    "title": "欢迎加入 Kanavoogle！",
     "subtitle": "创建新账户",
     "username": "用户名",
     "usernamePlaceholder": "你的姓名",

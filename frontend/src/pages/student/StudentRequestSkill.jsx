@@ -230,7 +230,7 @@ const fetchTeachers = async () => {
       const token = await user.getIdToken();
       await axios.post(`${BASE_URL}/skill/add`, {
         courseId: selectedCourseId,
-        fileCid: cid,
+        attachmentCid: cid,
         level: form.level,
         softSkills: form.softSkills,
       }, {
