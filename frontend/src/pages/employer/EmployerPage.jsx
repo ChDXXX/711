@@ -30,10 +30,10 @@ const EmployerPage = () => {
   ];
 
   return (
-  <Container size="xl" maw="1400px">
+  <Container size="xl" maw="1500px">
         <Group align="flex-start" noWrap>
           {/* Left: Navbar */}
-          <Box w={250}>
+          <Box >
             <HomeNavbar userData={userData} navbarData={navbarData} />
           </Box>
 

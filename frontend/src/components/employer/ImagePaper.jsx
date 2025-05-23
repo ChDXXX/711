@@ -1,7 +1,7 @@
-import { Paper, Flex, Box, Text, Button, Image } from "@mantine/core";
+import { Paper, Flex, Box, Text, Button, Image, Center } from "@mantine/core";
 import { IconFilePlus } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
-import classes from "../../pages/employer/EmployerPage.module.css";
+import classes from "./Button.module.css";
 
 export default function ImagePaper({
   title,
@@ -15,7 +15,7 @@ export default function ImagePaper({
     <Paper p="lg" radius="md" shadow="sm" withBorder>
       <Flex
         direction={{ base: "column", lg: "row" }}
-        gap="lg"
+        gap="xs"
         align="center"
         justify="center"
       >
@@ -27,7 +27,7 @@ export default function ImagePaper({
           <Text mb="md" fz="xl" style={{ fontFamily: "Times New Roman, serif" }}>{description}</Text>
           {showButton && (
             <Button
-              fullWidth
+              // width="100%"
               component={Link}
               to={buttonLink}
               leftSection={<IconFilePlus size={24} />}
@@ -37,11 +37,12 @@ export default function ImagePaper({
             </Button>
           )}
         </Box>
-        <Box style={{ flex: 1, padding: 20 }}>
+        <Box style={{ flex: 1, padding: 20, maxWidth: 350 }}>
           <Image
             radius="md"
             src={imageUrl}
             alt="illustration"
+            className={classes.smallImage}
           />
         </Box>
       </Flex>

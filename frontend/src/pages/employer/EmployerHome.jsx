@@ -209,7 +209,7 @@ export default function EmployerHome() {
   }
 
   return (
-    <Box mt="md">
+    <Box flex={1} mt="30px">
       <HeaderCard userData={userData} userType="employer" />
 
       <Grid mt="md">
@@ -217,8 +217,8 @@ export default function EmployerHome() {
           <ImagePaper
             title="Post Your Job"
             description="Attract talented students by creating a new job opportunity."
-            buttonText="Post Now"
-            buttonLink="/employer/request-skill"
+            buttonText="Post a Job"
+            buttonLink="/employer/add-job"
             imageUrl={postJobImage}
           />
         </Grid.Col>
@@ -232,8 +232,8 @@ export default function EmployerHome() {
         roundCaps
         sections={[
           { value: summary.total || 0, color: "blue", tooltip: "Total" },
-          { value: summary.viewed || 0, color: "teal", tooltip: "Viewed" },
-          { value: summary.shortlisted || 0, color: "orange", tooltip: "Shortlisted" },
+          { value: summary.accepted || 0, color: "teal", tooltip: "Viewed" },
+          { value: summary.rejected || 0, color: "orange", tooltip: "Shortlisted" },
         ]}
         label={<Text fw={700} ta="center">{summary.total || 0} Total</Text>}
       />
@@ -244,7 +244,7 @@ export default function EmployerHome() {
       </Grid>
 
       {/* Browse Students */}
-      <Paper mt="xl" p="md" radius="md" shadow="xs" withBorder>
+      {/* <Paper mt="xl" p="md" radius="md" shadow="xs" withBorder>
         <Flex align="flex-end" gap="sm">
           <TextInput
             label="Search students by skill"
@@ -297,16 +297,16 @@ export default function EmployerHome() {
           mt="md"
           size="sm"
         />
-      </Paper>
+      </Paper> */}
 
-      <Modal
+      {/* <Modal
         opened={opened}
         onClose={() => setOpened(false)}
         title="Student Skills"
         size="xl"
       >
         {selectedStudentId && <StudentWalletMini studentId={selectedStudentId} />}
-      </Modal>
+      </Modal> */}
     </Box>
   );
 }
