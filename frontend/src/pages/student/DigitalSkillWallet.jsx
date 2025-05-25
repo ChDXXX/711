@@ -326,6 +326,15 @@ const DigitalSkillWallet = () => {
               >
                 Job Board
               </Button>
+              <Button
+                fullWidth
+                variant="light"
+                component={Link}
+                to="/student/assigned-jobs"
+                style={{ flex: 1, marginLeft: "0.5rem" }}
+              >
+                Assigned Jobs
+              </Button>
             </Flex>
           </Grid.Col>
         </Grid>

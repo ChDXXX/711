@@ -1,0 +1,28 @@
+.user {
+    display: block;
+    width: 100%;
+    margin-left: 5px;
+    color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
+  }
+
+  /* Buttons */
+.actionButton.actionButton {
+  border: 1px solid var(--mantine-color-default-border) ;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: var(--mantine-color-blue-light); /* similar to variant="light" */
+  color: var(--mantine-color-blue-light-color); 
+  font-weight: 600;
+  font-size: 20px;
+  font-family: Arial, serif;
+  border-radius: 8px;
+  transition: background-color 0.2s ease-in-out;
+  height: 44px;
+  width: 50%;
+  margin: 0 auto;
+  display: block;
+}
+
+.actionButton.actionButton:hover {
+  background-color: var(--mantine-color-blue-light-color); /* slightly darker for hover */
+  color: white;
+}

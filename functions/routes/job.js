@@ -3,7 +3,6 @@ import admin from "firebase-admin";
 
 const router = express.Router();
 
-
 /**
  * JOBS api
  *
@@ -14,9 +13,9 @@ const router = express.Router();
  * - Students can view the list of jobs assigned to them. This is done by filtering jobs where their studentId exists in the `assignments[]` array.
  * - Each student can independently accept, reject, or complete their assigned job.
  * - Once a student marks their assignment as completed, the employer can verify it.
- * 
+ *
  * - Employers can Delete a job only if there are no assigned students)
- * 
+ *
  * - Students and Employers can get job details using: GET /jobs/:jobId
  *
  * Job Document Structure:
@@ -45,7 +44,6 @@ const router = express.Router();
  * - In GET /job, if the user role is "student", the job list is filtered to only include jobs
  *   where the current studentId appears in at least one assignment in the `assignments[]` array.
  */
-
 
 // Middleware: verify token and attach user info
 async function verifyToken(req, res, next) {
@@ -85,8 +83,11 @@ router.get("/:jobId", verifyToken, async (req, res) => {
     }
 
     if (role === "student") {
-      const isAssigned = (job.assignments || []).some(a => a.studentId === uid);
-      if (!isAssigned) return res.status(403).send("You are not assigned to this job");
+      const isAssigned = (job.assignments || []).some(
+        (a) => a.studentId === uid
+      );
+      if (!isAssigned)
+        return res.status(403).send("You are not assigned to this job");
     }
 
     // Populate assignment details
@@ -95,7 +96,10 @@ router.get("/:jobId", verifyToken, async (req, res) => {
     if (job.assignments?.length) {
       detailedAssignments = await Promise.all(
         job.assignments.map(async (a) => {
-          const studentDoc = await admin.firestore().doc(`users/${a.studentId}`).get();
+          const studentDoc = await admin
+            .firestore()
+            .doc(`users/${a.studentId}`)
+            .get();
           if (!studentDoc.exists) return a;
 
           const student = studentDoc.data();
@@ -104,12 +108,13 @@ router.get("/:jobId", verifyToken, async (req, res) => {
             student: {
               id: a.studentId,
               name: student.name || "",
-              schoolId: student.schoolId || ""
-            }
+              schoolId: student.schoolId || "",
+            },
           };
 
           if (student.schoolId) {
-            const schoolSnap = await admin.firestore()
+            const schoolSnap = await admin
+              .firestore()
               .collection("schools")
               .where("code", "==", student.schoolId)
               .limit(1)
@@ -128,42 +133,42 @@ router.get("/:jobId", verifyToken, async (req, res) => {
     res.status(200).json({
       id: jobDoc.id,
       ...job,
-      assignments: detailedAssignments
+      assignments: detailedAssignments,
     });
-
   } catch (error) {
     console.error("Error fetching job:", error.message);
     res.status(500).send("Failed to retrieve job");
   }
 });
 
-
-
 // POST /job
 router.post("/", verifyToken, async (req, res) => {
   const { title, description, price, location, skills, softSkills } = req.body;
   const { uid, role } = req.user;
 
-
-  if (role !== "employer") return res.status(403).send("Only employers can create jobs");
+  if (role !== "employer")
+    return res.status(403).send("Only employers can create jobs");
 
   if (!title || !description || !price || !location || !skills) {
     return res.status(400).send("All fields are required");
   }
 
   try {
-    const jobRef = await admin.firestore().collection("jobs").add({
-      title,
-      description,
-      price,
-      location,
-      skills,
-      softSkills: softSkills || [],
-      employerId: uid,
-      createdAt: new Date().toISOString(),
-      status: "pending",
-      verified: false
-    });
+    const jobRef = await admin
+      .firestore()
+      .collection("jobs")
+      .add({
+        title,
+        description,
+        price,
+        location,
+        skills,
+        softSkills: softSkills || [],
+        employerId: uid,
+        createdAt: new Date().toISOString(),
+        status: "pending",
+        verified: false,
+      });
 
     res.status(201).json({ jobId: jobRef.id });
   } catch (error) {
@@ -177,26 +182,30 @@ router.get("/", verifyToken, async (req, res) => {
   const { uid, role } = req.user;
 
   try {
-    const query = admin.firestore().collection("jobs").orderBy("createdAt", "desc");
+    const query = admin
+      .firestore()
+      .collection("jobs")
+      .orderBy("createdAt", "desc");
     const snapshot = await query.get();
 
-    let jobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    let jobs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
-
-    const softSkillsSnapshot = await admin.firestore().collection("soft-skills").get();
+    const softSkillsSnapshot = await admin
+      .firestore()
+      .collection("soft-skills")
+      .get();
     const softSkillMap = {};
-    softSkillsSnapshot.forEach(doc => {
+    softSkillsSnapshot.forEach((doc) => {
       softSkillMap[doc.id] = doc.data().name;
     });
 
-
     // If student: filter jobs where user is in assignments
     if (role === "student") {
-      jobs = jobs.filter(job =>
-        (job.assignments || []).some(a => a.studentId === uid)
+      jobs = jobs.filter((job) =>
+        (job.assignments || []).some((a) => a.studentId === uid)
       );
     } else if (role === "employer") {
-      jobs = jobs.filter(job => job.employerId === uid);
+      jobs = jobs.filter((job) => job.employerId === uid);
     }
 
     const enrichedJobs = await Promise.all(
@@ -205,7 +214,10 @@ router.get("/", verifyToken, async (req, res) => {
 
         job.assignments = await Promise.all(
           job.assignments.map(async (a) => {
-            const studentDoc = await admin.firestore().doc(`users/${a.studentId}`).get();
+            const studentDoc = await admin
+              .firestore()
+              .doc(`users/${a.studentId}`)
+              .get();
             if (!studentDoc.exists) return a;
 
             const student = studentDoc.data();
@@ -215,18 +227,20 @@ router.get("/", verifyToken, async (req, res) => {
                 id: a.studentId,
                 name: student.name || "",
                 schoolId: student.schoolId || "",
-              }
+              },
             };
 
             if (student.schoolId) {
-              const schoolSnapshot = await admin.firestore()
+              const schoolSnapshot = await admin
+                .firestore()
                 .collection("schools")
                 .where("code", "==", student.schoolId)
                 .limit(1)
                 .get();
 
               if (!schoolSnapshot.empty) {
-                assignmentWithDetails.student.schoolName = schoolSnapshot.docs[0].data().name;
+                assignmentWithDetails.student.schoolName =
+                  schoolSnapshot.docs[0].data().name;
               }
             }
 
@@ -238,36 +252,34 @@ router.get("/", verifyToken, async (req, res) => {
       })
     );
 
-    const jobsWithSoftSkillNames = enrichedJobs.map(job => ({
+    const jobsWithSoftSkillNames = enrichedJobs.map((job) => ({
       ...job,
-      softSkills: (job.softSkills || []).map(id => softSkillMap[id] || id),
+      softSkills: (job.softSkills || []).map((id) => softSkillMap[id] || id),
     }));
     res.json(jobsWithSoftSkillNames);
-    
   } catch (error) {
     console.error("Error fetching jobs:", error.message);
     res.status(500).send("Failed to retrieve jobs");
   }
 });
 
-
-
 // PUT /employer/job/:jobId
 router.put("/:jobId", verifyToken, async (req, res) => {
   const { jobId } = req.params;
   const { title, description, price, location, skills, softSkills } = req.body;
 
-  
   const { uid, role } = req.user;
 
-  if (role !== "employer") return res.status(403).send("Only employers can edit jobs");
+  if (role !== "employer")
+    return res.status(403).send("Only employers can edit jobs");
 
   try {
     const jobRef = admin.firestore().doc(`jobs/${jobId}`);
     const jobDoc = await jobRef.get();
 
     if (!jobDoc.exists) return res.status(404).send("Job not found");
-    if (jobDoc.data().employerId !== uid) return res.status(403).send("Unauthorized");
+    if (jobDoc.data().employerId !== uid)
+      return res.status(403).send("Unauthorized");
 
     await jobRef.update({
       title,
@@ -290,7 +302,8 @@ router.put("/:jobId/assign/:studentId", verifyToken, async (req, res) => {
   const { jobId, studentId } = req.params;
   const { uid, role } = req.user;
 
-  if (role !== "employer") return res.status(403).send("Only employers can assign jobs");
+  if (role !== "employer")
+    return res.status(403).send("Only employers can assign jobs");
 
   try {
     const jobDoc = await admin.firestore().doc(`jobs/${jobId}`).get();
@@ -306,10 +319,10 @@ router.put("/:jobId/assign/:studentId", verifyToken, async (req, res) => {
       assignments: admin.firestore.FieldValue.arrayUnion({
         studentId,
         status: "assigned",
-        timestamp: new Date().toISOString()
-      })
+        timestamp: new Date().toISOString(),
+      }),
     });
-    
+
     res.status(200).send("Job assigned successfully");
   } catch (error) {
     console.error("Assignment error:", error.message);
@@ -322,7 +335,8 @@ router.put("/:jobId/verify/:studentId", verifyToken, async (req, res) => {
   const { jobId, studentId } = req.params;
   const { uid, role } = req.user;
 
-  if (role !== "employer") return res.status(403).send("Only employers can verify");
+  if (role !== "employer")
+    return res.status(403).send("Only employers can verify");
 
   try {
     const jobDoc = await admin.firestore().doc(`jobs/${jobId}`).get();
@@ -334,14 +348,17 @@ router.put("/:jobId/verify/:studentId", verifyToken, async (req, res) => {
 
     const assignments = jobData.assignments || [];
 
-    const studentAssignment = assignments.find(a => a.studentId === studentId);
+    const studentAssignment = assignments.find(
+      (a) => a.studentId === studentId
+    );
 
-    if (!studentAssignment) return res.status(404).send("Assignment not found for student");
+    if (!studentAssignment)
+      return res.status(404).send("Assignment not found for student");
     if (studentAssignment.status !== "completed") {
       return res.status(400).send("Job is not yet completed by the student");
     }
 
-    const updatedAssignments = assignments.map(a =>
+    const updatedAssignments = assignments.map((a) =>
       a.studentId === studentId
         ? { ...a, status: "verified", timestamp: new Date().toISOString() }
         : a
@@ -356,35 +373,38 @@ router.put("/:jobId/verify/:studentId", verifyToken, async (req, res) => {
   }
 });
 
-
 // PUT /student/job/:jobId/accept
 router.put("/:jobId/accept", verifyToken, async (req, res) => {
   const { jobId } = req.params;
   const { uid, role } = req.user;
 
-  if (role !== "student") return res.status(403).send("Only students can accept jobs");
+  if (role !== "student")
+    return res.status(403).send("Only students can accept jobs");
 
   try {
     const jobDoc = await admin.firestore().doc(`jobs/${jobId}`).get();
     if (!jobDoc.exists) return res.status(404).send("Job not found");
 
-    if (jobDoc.data().studentId !== uid) {
-      return res.status(403).send("Not your assigned job");
-    }
-
-    //await jobDoc.ref.update({ status: "accepted" });
-
     const jobData = jobDoc.data();
     const assignments = jobData.assignments || [];
 
-    const updatedAssignments = assignments.map(a =>
+    const studentIds = assignments.map((a) => a.studentId);
+    if (!studentIds.includes(uid)) {
+      return res.status(403).send("Not your assigned job");
+    }
+    // if (jobDoc.data().studentId !== uid) {
+    //   return res.status(403).send("Not your assigned job");
+    // }
+
+    //await jobDoc.ref.update({ status: "accepted" });
+
+    const updatedAssignments = assignments.map((a) =>
       a.studentId === uid && a.status === "assigned"
         ? { ...a, status: "accepted", timestamp: new Date().toISOString() }
         : a
     );
 
     await jobDoc.ref.update({ assignments: updatedAssignments });
-
 
     res.status(200).send("Job accepted");
   } catch (error) {
@@ -398,11 +418,20 @@ router.put("/:jobId/reject", verifyToken, async (req, res) => {
   const { jobId } = req.params;
   const { uid, role } = req.user;
 
-  if (role !== "student") return res.status(403).send("Only students can reject jobs");
+  if (role !== "student")
+    return res.status(403).send("Only students can reject jobs");
 
   try {
     const jobDoc = await admin.firestore().doc(`jobs/${jobId}`).get();
     if (!jobDoc.exists) return res.status(404).send("Job not found");
+
+    const jobData_reject = jobDoc.data();
+    const assignments_reject = jobData_reject.assignments || [];
+
+    const studentIds = assignments_reject.map((a) => a.studentId);
+    if (!studentIds.includes(uid)) {
+      return res.status(403).send("Not your assigned job");
+    }
 
     /*
       if (jobDoc.data().studentId !== uid) {
@@ -415,16 +444,14 @@ router.put("/:jobId/reject", verifyToken, async (req, res) => {
     const jobData = jobDoc.data();
     const assignments = jobData.assignments || [];
 
-    const updatedAssignments = assignments.map(a =>
+    const updatedAssignments = assignments.map((a) =>
       a.studentId === uid && a.status === "assigned"
-        ? { ...a, status: "accepted", timestamp: new Date().toISOString() }
+        ? { ...a, status: "rejected", timestamp: new Date().toISOString() }
         : a
     );
 
     await jobDoc.ref.update({ assignments: updatedAssignments });
 
-      
-    
     res.status(200).send("Job rejected");
   } catch (error) {
     console.error("Reject error:", error.message);
@@ -437,24 +464,33 @@ router.put("/:jobId/complete", verifyToken, async (req, res) => {
   const { jobId } = req.params;
   const { uid, role } = req.user;
 
-  if (role !== "student") return res.status(403).send("Only students can complete jobs");
+  if (role !== "student")
+    return res.status(403).send("Only students can complete jobs");
 
   try {
     const jobDoc = await admin.firestore().doc(`jobs/${jobId}`).get();
     if (!jobDoc.exists) return res.status(404).send("Job not found");
 
-    if (jobDoc.data().studentId !== uid) {
+    const jobData_complete = jobDoc.data();
+    const assignments_complete = jobData_complete.assignments || [];
+
+    const studentIds = assignments_complete.map((a) => a.studentId);
+    if (!studentIds.includes(uid)) {
       return res.status(403).send("Not your assigned job");
     }
+
+    // if (jobDoc.data().studentId !== uid) {
+    //   return res.status(403).send("Not your assigned job");
+    // }
 
     //await jobDoc.ref.update({ status: "completed" });
 
     const jobData = jobDoc.data();
     const assignments = jobData.assignments || [];
 
-    const updatedAssignments = assignments.map(a =>
-      a.studentId === uid && a.status === "assigned"
-        ? { ...a, status: "accepted", timestamp: new Date().toISOString() }
+    const updatedAssignments = assignments.map((a) =>
+      a.studentId === uid && a.status === "accepted"
+        ? { ...a, status: "completed", timestamp: new Date().toISOString() }
         : a
     );
 
@@ -471,7 +507,8 @@ router.delete("/:jobId", verifyToken, async (req, res) => {
   const { jobId } = req.params;
   const { uid, role } = req.user;
 
-  if (role !== "employer") return res.status(403).send("Only employers can delete jobs");
+  if (role !== "employer")
+    return res.status(403).send("Only employers can delete jobs");
 
   try {
     const jobRef = admin.firestore().doc(`jobs/${jobId}`);
@@ -484,7 +521,9 @@ router.delete("/:jobId", verifyToken, async (req, res) => {
     if (job.employerId !== uid) return res.status(403).send("Unauthorized");
 
     if (Array.isArray(job.assignments) && job.assignments.length > 0) {
-      return res.status(400).send("Job cannot be deleted because it has assigned students.");
+      return res
+        .status(400)
+        .send("Job cannot be deleted because it has assigned students.");
     }
 
     await jobRef.delete();
@@ -494,9 +533,5 @@ router.delete("/:jobId", verifyToken, async (req, res) => {
     res.status(500).send("Failed to delete job");
   }
 });
-
-
-
-
 
 export default router;

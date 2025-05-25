@@ -19,6 +19,7 @@ import StudentHome from '../pages/student/StudentHome';
 import StudentRequestSkill from '../pages/student/StudentRequestSkill';
 import StudentSettings from '../pages/student/StudentSettings';
 import DigitalSkillWallet from '../pages/student/DigitalSkillWallet';
+import AssignedJobs from '../pages/student/AssignedJobs'; 
 
 import JobDetail from '../pages/student/JobDetail'; 
 import MyJobApplications from '../pages/student/MyJobApplications'; 
@@ -67,6 +68,7 @@ const AppRouter = createBrowserRouter([
         { path: "settings", element: <StudentSettings /> },       
         { path: "job/:jobId", element: <JobDetail /> },
         { path: "job", element: <JobDetail /> }, 
+        { path: "assigned-jobs", element: <AssignedJobs /> },
         { path: "applications", element: <MyJobApplications /> },   // 加入
       ]
     },
