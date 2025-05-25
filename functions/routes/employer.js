@@ -155,64 +155,67 @@ router.get("/students/skills/:skill", verifyEmployer, async (req, res) => {
       softSkillMap[doc.id] = doc.data().name;
     });
 
-    // Step 2: Load all skills and filter by keyword match
+    // Step 2: Load all skills
     const skillSnapshot = await admin.firestore().collection("skills").get();
+    const allSkills = skillSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    const matchedSkills = skillSnapshot.docs.filter(doc =>
-      (doc.data().title || "").toLowerCase().includes(skill.toLowerCase())
-    );
-
-    // Step 3: Group by student ID
-    const studentSkillsMap = {};
-    matchedSkills.forEach(doc => {
-      const data = doc.data();
-      const { ownerId, title, softSkills = [] } = data;
-
-      if (!ownerId) return;
-
-      if (!studentSkillsMap[ownerId]) {
-        studentSkillsMap[ownerId] = {
-          skills: [],
-          softSkillMatchCount: 0,
-        };
-      }
-
-      const matchCount = softSkills.filter(s => jobSoftSkills.includes(String(s))).length;
-      const softTitles = softSkills.map(id => softSkillMap[id] || id);
-
-      studentSkillsMap[ownerId].skills.push({
-        title,
-        softSkillTitles: softTitles
-      });
-
-      studentSkillsMap[ownerId].softSkillMatchCount += matchCount;
-    });
-
-    // Step 4: Fetch and enrich student data
-    const students = [];
-
-    for (const studentId of Object.keys(studentSkillsMap)) {
-      const userDoc = await admin.firestore().collection("users").doc(studentId).get();
-
-      if (userDoc.exists && userDoc.data().role === "student") {
-        const userData = userDoc.data();
-
-        students.push({
-          id: studentId,
-          name: userData.name,
-          email: userData.email,
-          customUid: userData.customUid,
-          schoolId: userData.schoolId,
-          schoolName: schoolMap[userData.schoolId] || userData.schoolId,
-          major: userData.major,
-          majorName: majorMap[userData.major] || userData.major,
-          skills: studentSkillsMap[studentId].skills,
-          softSkillMatchCount: studentSkillsMap[studentId].softSkillMatchCount,
-        });
+    // Step 3: Filter only students who match the search term
+    const matchedStudentIds = new Set();
+    for (const s of allSkills) {
+      if ((s.title || "").toLowerCase().includes(skill.toLowerCase()) && s.ownerId) {
+        matchedStudentIds.add(s.ownerId);
       }
     }
 
-    // Step 5: Sort by soft skill match count (descending)
+    // Step 4: Group all skills by matched students
+    const studentSkillsMap = new Map();
+    for (const s of allSkills) {
+      const studentId = s.ownerId;
+      if (!studentId || !matchedStudentIds.has(studentId)) continue;
+
+      if (!studentSkillsMap.has(studentId)) {
+        studentSkillsMap.set(studentId, {
+          skills: [],
+          softSkillMatchCount: 0
+        });
+      }
+
+      const softTitles = (s.softSkills || []).map(id => softSkillMap[id] || id);
+      const softMatchCount = (s.softSkills || []).filter(id => jobSoftSkills.includes(String(id))).length;
+
+      studentSkillsMap.get(studentId).skills.push({
+        title: s.title,
+        level: s.level || null,
+        softSkillTitles: softTitles
+      });
+
+      studentSkillsMap.get(studentId).softSkillMatchCount += softMatchCount;
+    }
+
+    // Step 5: Fetch student info
+    const students = [];
+    for (const [studentId, skillData] of studentSkillsMap.entries()) {
+      const userDoc = await admin.firestore().collection("users").doc(studentId).get();
+      if (!userDoc.exists || userDoc.data().role !== "student") continue;
+
+      const user = userDoc.data();
+
+      students.push({
+        id: studentId,
+        studentId, // to be consistent
+        name: user.name,
+        email: user.email,
+        customUid: user.customUid,
+        schoolId: user.schoolId,
+        schoolName: schoolMap[user.schoolId] || user.schoolId,
+        major: user.major,
+        majorName: majorMap[user.major] || user.major,
+        skills: skillData.skills,
+        softSkillMatchCount: skillData.softSkillMatchCount,
+      });
+    }
+
+    // Step 6: Sort
     students.sort((a, b) => b.softSkillMatchCount - a.softSkillMatchCount);
 
     res.json(students);
@@ -221,6 +224,7 @@ router.get("/students/skills/:skill", verifyEmployer, async (req, res) => {
     res.status(500).send("Failed to search students");
   }
 });
+
 
 
 
@@ -235,10 +239,11 @@ router.get("/search-students", verifyEmployer, async (req, res) => {
   console.log("softSkillsFilter:", softSkillsFilter);
 
   try {
-    // Step 1: Load all schools and majors for mapping
-    const [schoolsSnap, majorsSnap] = await Promise.all([
+    // Step 1: Load all schools, majors, and soft skill names
+    const [schoolsSnap, majorsSnap, softSkillsSnap] = await Promise.all([
       admin.firestore().collection("schools").get(),
       admin.firestore().collection("majors").get(),
+      admin.firestore().collection("soft-skills").get(),
     ]);
 
     const schoolMap = {};
@@ -255,48 +260,45 @@ router.get("/search-students", verifyEmployer, async (req, res) => {
       majorMap[doc.id] = data.name;
     });
 
-    const softSkillsSnap = await admin.firestore().collection("soft-skills").get();
-        const softSkillMap = {};
-        softSkillsSnap.docs.forEach(doc => {
-          softSkillMap[doc.id] = doc.data().name;
+    const softSkillMap = {};
+    softSkillsSnap.docs.forEach(doc => {
+      softSkillMap[doc.id] = doc.data().name;
     });
 
-    // Step 2: Get all skills and filter
+    // Step 2: Load all skills
     const skillSnapshot = await admin.firestore().collection("skills").get();
     const allSkills = skillSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    console.log("All skills:", JSON.stringify(allSkills, null, 2));
 
-    const filteredSkills = allSkills.filter(skill => {
-      if (!skill.softSkills) {
-        console.warn(`Skill ${skill.title} has no softSkills field`);
-      }
+    // Step 3: Identify matched students
+    const matchedStudentIds = new Set();
+    for (const skill of allSkills) {
       const matchesTech =
         techSkillsFilter.length === 0 ||
         techSkillsFilter.some(filter =>
           (skill.title || "").toLowerCase().includes(filter.toLowerCase())
         );
-      const matchesSoft = softSkillsFilter.length === 0 || (skill.softSkills || []).some(s => softSkillsFilter.includes(String(s)));
-      console.log(`Skill: ${skill.title}, softSkills: ${JSON.stringify(skill.softSkills)}, matchesTech: ${matchesTech}, matchesSoft: ${matchesSoft}`);
-      return matchesTech && matchesSoft;
-    });
 
-    console.log("filteredSkills:", filteredSkills);
-    if (filteredSkills.length === 0) {
-      console.log("No skills matched the filters");
+      const matchesSoft =
+        softSkillsFilter.length === 0 ||
+        (skill.softSkills || []).some(s => softSkillsFilter.includes(String(s)));
+
+      if (matchesTech && matchesSoft && skill.ownerId) {
+        matchedStudentIds.add(skill.ownerId);
+      }
+    }
+
+    if (matchedStudentIds.size === 0) {
+      console.log("No students matched the filters");
       return res.json([]);
     }
 
-    // Step 3: Group skills by student
+    // Step 4: Group all skills by student (only for matched students)
     const studentSkillMap = new Map();
-    for (const skill of filteredSkills) {
+    for (const skill of allSkills) {
       const studentId = skill.ownerId;
-      if (!studentId) {
-        console.warn("Skill without ownerId:", skill);
-        continue;
-      }
+      if (!studentId || !matchedStudentIds.has(studentId)) continue;
 
       if (!studentSkillMap.has(studentId)) {
-        console.log(`Adding new studentId to map: ${studentId}`);
         studentSkillMap.set(studentId, []);
       }
 
@@ -306,25 +308,16 @@ router.get("/search-students", verifyEmployer, async (req, res) => {
       });
     }
 
-    console.log("studentSkillMap:", studentSkillMap);
-
-    // Step 4: Load student info and enrich with school/major names
+    // Step 5: Load student info and build response
     const results = [];
 
     for (const [studentId, skills] of studentSkillMap.entries()) {
-      console.log("Processing studentId:", studentId);
       const studentDoc = await admin.firestore().doc(`users/${studentId}`).get();
-      if (!studentDoc.exists) {
-        console.log(`Student ${studentId} does not exist in users collection`);
-        continue;
-      }
-      if (studentDoc.data().role !== "student") {
-        console.log(`User ${studentId} is not a student, role: ${studentDoc.data().role}`);
-        continue;
-      }
+      if (!studentDoc.exists) continue;
 
       const student = studentDoc.data();
-      console.log("Adding student to results:", studentId, student.name);
+      if (student.role !== "student") continue;
+
       results.push({
         studentId,
         name: student.name,
@@ -344,6 +337,7 @@ router.get("/search-students", verifyEmployer, async (req, res) => {
     res.status(500).send("Failed to search students");
   }
 });
+
 
 
 
