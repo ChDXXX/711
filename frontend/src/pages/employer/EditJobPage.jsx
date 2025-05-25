@@ -267,6 +267,7 @@ const EditJobPage = () => {
               return (
                 <StudentCard
                   key={student.id}
+                  studentId={student.studentId || student.id}
                   {...student}
                   setOpenedModalId={setOpenedModalId}
                   openedModalId={openedModalId}                  

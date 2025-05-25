@@ -12,6 +12,7 @@ import StudentDashboard from "./StudentDashboard";
 
 function StudentCard({
   id,
+  studentId,
   name,
   email,
   university,
@@ -55,7 +56,7 @@ function StudentCard({
   const bgColors = ["#E3F2FD", "#FCE4EC", "#FFF3E0", "#E8F5E9"];
   const randomColor = bgColors[Math.floor(Math.random() * bgColors.length)];
   const selectedJobValue = assignedJobs[id] ?? null;
-  const isModalOpen = openedModalId === id;
+  const isModalOpen = openedModalId === studentId;
 
   return (
     <Card shadow="sm" radius="md" h="100%" withBorder style={{ maxWidth: 400 }}>
@@ -151,7 +152,7 @@ function StudentCard({
           fullWidth
           mt="xs"
           variant="light"
-          onClick={() => setOpenedModalId(id)}
+          onClick={() => setOpenedModalId(studentId)}
         >
           Show Dashboard
         </Button>

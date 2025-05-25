@@ -96,7 +96,6 @@ const StudentDashboard = ({
               }}
             >
               <Group spacing="xs" align="center">
-                {skillIconMap[skillObj.title] || null}
                 <Text fw={500}>{skillObj.title}</Text>
                 {skillObj.level && (
                   <Text size="xs" c="dimmed">({skillObj.level})</Text>
