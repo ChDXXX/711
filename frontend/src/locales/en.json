@@ -17,9 +17,6 @@
   },
   "wallet": {
     "selectSkillTitle": "Select a Skill to View Scores",
-    "overallScoreSummary": "Overall Score Summary",
-    "softSkillScores": "Soft Skill Scores",
-    "hardSkillScores": "Hard Skill Scores",
     "myVerifiedSkills": "My Verified Skills",
     "graduationReminderTitle": "Graduation Reminder",
     "graduationReminderMessage": "After graduation, your school email will be deactivated. Please use your personal email to log in!",
@@ -30,7 +27,12 @@
     "course": "Course",
     "verifiedBy": "Verified by",
     "score": "Score",
-    "visibleToEmployer": "Visible to Employers"
+    "visibleToEmployer": "Visible to Employers",
+    "skillsOverview":"Approved Skills Overview",
+    "chartsOverview":"Charts Overview",
+    "peiChart":"Skill Level Distribution",
+    "barChart":"Soft Skills Frequency"
+
   },
   "home": {
     "welcome": "Welcome back",
@@ -287,7 +289,7 @@
     "invalidRole": "Invalid role assigned"
   },
   "register": {
-    "title": "Welcome to Skivy!",
+    "title": "Welcome to Kanavoogle!",
     "subtitle": "Create a new account",
     "username": "Username",
     "usernamePlaceholder": "Your name",
@@ -341,10 +343,6 @@
       "title": "Immutable credentials",
       "desc": "Every endorsement is hashed and anchored on a public blockchain. If the file ever changes, the hash doesnt match making tampering impossible."
     },
-    "wallet": {
-      "title": "Portable skill wallet",
-      "desc": "Learners own a single wallet address. They carry verified skills from school job lifelong learning no platform lockin, no subscription fees."
-    },
     "workflow": {
       "title": "Multistakeholder workflow",
       "desc": "Students request, teachers approve, employers verify all through rolebased dashboards defined in the project scope."
@@ -374,6 +372,7 @@
     "pendingSkillsMessage": "You have {{count}} skill(s) pending"
   },
   "notification":{
-    "check": "Check my request history."
+    "studentCheck": "View my skill request history.",
+    "schoolCheck": "Check pending skill requests."
   }
 }

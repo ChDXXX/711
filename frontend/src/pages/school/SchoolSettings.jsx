@@ -1,151 +1,145 @@
+import { useEffect, useState } from "react";
 import {
-  Box, Title, Switch, Group, Divider, Button, Text,
-  Stack, Paper, TextInput, Notification, Select
+  Box, Paper, Title, Grid, Button, Divider,
+  Select, Notification, Text, Modal, Group,
 } from "@mantine/core";
 import {
-  IconCheck, IconMail, IconKey, IconLanguage
+  IconLanguage, IconMoonStars, IconTrash,
+  IconCheck, IconKey, IconDownload,
 } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
-import { auth, db } from "../../firebase";
 import { useAuth } from "../../context/AuthContext";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { sendPasswordResetEmail, updateEmail } from "firebase/auth";
+import { db, auth } from "../../firebase";
+import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { deleteUser, sendPasswordResetEmail } from "firebase/auth";
 import { useTranslation } from "react-i18next";
+import jsPDF from "jspdf";
 
-export default function SchoolSettings() {
-  const { t } = useTranslation();
-  const { user } = useAuth();
-  const [email, setEmail] = useState("");
-  const [newEmail, setNewEmail] = useState("");
-  const [notifyEmail, setNotifyEmail] = useState(false);
+export default function StudentSettings() {
+  const { t, i18n } = useTranslation();
+  const { user }    = useAuth();
+
   const [language, setLanguage] = useState("en");
-  const [theme, setTheme] = useState("light");
-  const [saved, setSaved] = useState(false);
+  const [theme, setTheme]       = useState("light");
+  const [saved, setSaved]       = useState(false);
+  const [openDel, setOpenDel]   = useState(false);
 
+  /* 初始加载 */
   useEffect(() => {
-    if (user) loadSettings();
+    if (!user) return;
+    getDoc(doc(db, "users", user.uid)).then(snap => {
+      if (!snap.exists()) return;
+      const d = snap.data();
+      setLanguage(d.language || "en");
+      setTheme(d.theme || "light");
+    });
   }, [user]);
 
-  const loadSettings = async () => {
-    const docRef = doc(db, "users", user.uid);
-    const snap = await getDoc(docRef);
-    if (snap.exists()) {
-      const data = snap.data();
-      setEmail(data.email || user.email);
-      setNewEmail(data.email || user.email);
-      setNotifyEmail(data.notifyByEmail || false);
-      setLanguage(data.language || "en");
-      setTheme(data.theme || "light");
-    }
-  };
-
-  const handleSave = async () => {
-    const ref = doc(db, "users", user.uid);
-    await updateDoc(ref, {
-      notifyByEmail,
-      language,
-      theme,
-      email: newEmail,
-    });
-
-    if (newEmail !== user.email) {
-      try {
-        await updateEmail(user, newEmail);
-      } catch (err) {
-        console.error("Email update failed:", err.message);
-        alert("Failed to update email. Please re-authenticate.");
-      }
-    }
-
+  /* 保存首选项 */
+  const save = async () => {
+    await updateDoc(doc(db, "users", user.uid), { language, theme });
+    i18n.changeLanguage(language);
     localStorage.setItem("i18nextLng", language);
-    window.location.reload();
-
     setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setTimeout(() => setSaved(false), 2000);
   };
 
-  const handleResetPassword = async () => {
-    try {
-      await sendPasswordResetEmail(auth, email);
-      alert(t("resetSuccess"));
-    } catch (err) {
-      alert(t("resetFail") + ": " + err.message);
-    }
+  /* 重置密码 */
+  const resetPwd = () =>
+    sendPasswordResetEmail(auth, user.email).then(() =>
+      alert(t("settings.resetSuccess"))
+    );
+
+  /* 导出 PDF */
+  const exportPDF = () => {
+    const pdf = new jsPDF();
+    pdf.text("Account Settings Summary", 10, 10);
+    pdf.text(`Email: ${user.email}`, 10, 20);
+    pdf.text(`Language: ${language}`, 10, 30);
+    pdf.text(`Theme: ${theme}`, 10, 40);
+    pdf.save("settings-summary.pdf");
+  };
+
+  /* 注销账户 */
+  const deleteAccount = async () => {
+    await deleteDoc(doc(db, "users", user.uid));
+    await deleteUser(auth.currentUser);
   };
 
   return (
-    <Box mt="xl">
-      <Title order={2}>{t("settings")}</Title>
+    <Box flex={1} mt="30px">
+      <Title order={2}>{t("settings.title")}</Title>
 
-      <Paper withBorder shadow="xs" p="md" mt="md">
-        <Stack spacing="md">
-          <TextInput
-            label={t("email")}
-            icon={<IconMail size={16} />}
-            value={newEmail}
-            onChange={(e) => setNewEmail(e.currentTarget.value)}
-          />
+      <Paper withBorder shadow="sm" p="xl" maw={480} w="100%" radius="md" mt="10px">
 
-          <Group position="apart">
-            <Group>
-              <IconMail size={18} />
-              <Text>{t("notifications")}</Text>
-            </Group>
-            <Switch
-              checked={notifyEmail}
-              onChange={(e) => setNotifyEmail(e.currentTarget.checked)}
-            />
-          </Group>
+        {/* Account */}
+        <Title order={4} mb="sm">{t("settings.account")}</Title>
+        <Group gap="sm" mb="lg">
+          <Button variant="light" leftIcon={<IconKey size={16}/>} onClick={resetPwd}>
+            {t("settings.resetPassword")}
+          </Button>
+          <Button variant="light" color="red" leftIcon={<IconTrash size={16}/>} onClick={() => setOpenDel(true)}>
+            {t("settings.deleteAccount")}
+          </Button>
+        </Group>
 
-          <Divider />
+        <Divider my="lg" />
 
-          <Group position="apart">
-            <Group>
-              <IconLanguage size={18} />
-              <Text>{t("language")}</Text>
-            </Group>
+        {/* Preference */}
+        <Title order={4} mb="sm">{t("settings.preference")}</Title>
+        <Grid gutter="lg" align="center">
+          <Grid.Col span={5}>
+            <Group gap={6}><IconLanguage size={18}/><Text size="sm">{t("settings.language")}</Text></Group>
+          </Grid.Col>
+          <Grid.Col span={7}>
             <Select
-              data={[
-                { value: "en", label: "English" },
-                { value: "zh", label: "中文" },
-              ]}
+              data={[{ value:"en", label:"English" }, { value:"zh", label:"中文" }]}
               value={language}
               onChange={setLanguage}
-              style={{ width: 160 }}
             />
-          </Group>
+          </Grid.Col>
 
-          <Group position="apart">
-            <Group>
-              <IconKey size={18} />
-              <Text>{t("theme")}</Text>
-            </Group>
+          <Grid.Col span={5}>
+            <Group gap={6}><IconMoonStars size={18}/><Text size="sm">{t("settings.theme")}</Text></Group>
+          </Grid.Col>
+          <Grid.Col span={7}>
             <Select
               data={[
-                { value: "light", label: t("light", "Light") },
-                { value: "dark", label: t("dark", "Dark") },
+                { value:"light", label:t("settings.light") },
+                { value:"dark",  label:t("settings.dark")  },
               ]}
               value={theme}
               onChange={setTheme}
-              style={{ width: 160 }}
             />
-          </Group>
+          </Grid.Col>
+        </Grid>
 
-          <Divider />
+        <Button fullWidth mt="lg" color="blue" onClick={save}>
+          {t("settings.save")}
+        </Button>
 
-          <Button variant="default" onClick={handleResetPassword}>
-            {t("resetPassword")}
-          </Button>
-
-          <Button color="blue" onClick={handleSave}>
-            {t("save")}
-          </Button>
-
-          {saved && (
-            <Notification icon={<IconCheck />} color="teal" title={t("saveSuccess")} />
-          )}
-        </Stack>
+        {saved && (
+          <Notification
+            icon={<IconCheck/>}
+            color="teal"
+            title={t("settings.saveSuccess")}
+            mt="sm"
+            onClose={() => setSaved(false)}
+          />
+        )}
       </Paper>
+
+      {/* 删除弹窗 */}
+      <Modal opened={openDel} onClose={() => setOpenDel(false)} title={t("settings.deleteConfirm")} centered>
+        <Text mb="md">{t("settings.deletePrompt")}</Text>
+        <Group grow>
+          <Button variant="outline" onClick={() => setOpenDel(false)}>
+            {t("settings.cancel")}
+          </Button>
+          <Button color="red" onClick={deleteAccount}>
+            {t("settings.confirm")}
+          </Button>
+        </Group>
+      </Modal>
     </Box>
   );
 }

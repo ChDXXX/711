@@ -224,4 +224,3 @@ const softSkillCounts = () => {
       </Container>
     </Box>
   );
-}

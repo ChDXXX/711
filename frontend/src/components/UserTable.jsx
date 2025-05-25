@@ -1,32 +1,49 @@
-import { Avatar, Group, Box, Title, Button, Flex, Text, Stack, Paper } from "@mantine/core";
-import { useTranslation } from "react-i18next";
+import {
+  Avatar,
+  Group,
+  Box,
+  Title,
+  Flex,
+  Text,
+  Stack,
+  Paper,
+} from '@mantine/core';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import '../style/global.css';
 
-export default function UserTable({ title, data = [], onClickMore }) {
+export default function UserTable({
+  title,
+  studentList = [],
+}) {
+  const navigate = useNavigate();
   const { t } = useTranslation();
 
   return (
-    <Box w="100%" mb="50px">
-      <Stack spacing="xs">
-        <Group>
-          <Title order={3}>{t(title)}</Title>
-          {onClickMore && (
-            <Button variant="light" ml="auto" mt="15px" onClick={onClickMore}>
-              {t("global.more")}
-            </Button>
-          )}
-        </Group>
+    <Box w="100%" mb="50px" px="sm" mt="6px">
+      <Title order={3}>{t(title)}</Title>
 
-        {data.map((item, index) => (
+      <Stack
+      mt="16px"
+        spacing="xs"
+        style={{
+          maxHeight: 480,         
+          overflowY: 'auto',
+        }}
+      >
+        {studentList.map((item, idx) => (
           <Paper
-            key={`${item.email || item.name}-${index}`}
+            key={`${item.email || item.name}-${idx}`}
             withBorder
             p="sm"
             radius="md"
+            className="click-row"
+            onClick={() => navigate(`/digital-skill-wallet/${item.customUid}`)}
           >
             <Flex
               justify="space-between"
               align="center"
-              direction={{ base: "column", sm: "row" }}
+              direction={{ base: 'column', sm: 'row' }}
               gap="sm"
             >
               <Group gap="sm">
@@ -34,14 +51,21 @@ export default function UserTable({ title, data = [], onClickMore }) {
                   {item.name.slice(0, 2).toUpperCase()}
                 </Avatar>
                 <div>
-                  <Text fw={600} size="sm">{item.name}</Text>
-                  <Text size="xs" c="dimmed">{item.email}</Text>
+                  <Text fw={600} size="sm">
+                    {item.name}
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    {item.email}
+                  </Text>
                 </div>
               </Group>
+
               <Flex gap="sm" align="center" wrap="wrap">
-                <Text size="sm" fw={500}>{item.course}</Text>
+                <Text size="sm" fw={500}>
+                  {item.course}
+                </Text>
                 <Text size="xs" c="dimmed">
-                  {t("user.lastActive")}: {item.lastActive}
+                  {t('user.lastActive')}: {item.lastActive}
                 </Text>
               </Flex>
             </Flex>

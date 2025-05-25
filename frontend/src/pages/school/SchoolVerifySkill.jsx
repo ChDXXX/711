@@ -2,8 +2,9 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import {
   Box, Paper, Title, Text, Group, Button, TextInput,
-  NumberInput, Textarea, Loader, Stack, Divider, Select, Collapse, Progress, Table
+  NumberInput, Textarea, Loader, Stack, Divider, Select, Collapse, SimpleGrid, Table
 } from "@mantine/core";
+import { IconChevronLeft } from '@tabler/icons-react';
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
 
@@ -235,123 +236,129 @@ export default function SchoolVerifySkill() {
           const state = formState[skill.id] || {};
           const decision = state.decision;
 
-          return (
-            <Box key={skill.id} ref={(el) => (skillRefs.current[skill.id] = el)}>
-              <Paper p="md" radius="md" shadow="xs" withBorder mb="lg">
-                <Group position="apart">
-                  <Title order={4}>{skill.title} ({skill.level})</Title>
-                  <Button variant="light" onClick={() => setSelectedSkillId(null)}>← Back</Button>
-                </Group>
-                <Text size="sm" c="dimmed">Course: {skill.courseTitle} ({skill.courseCode})</Text>
-                <Text size="sm">Student: {skill.student?.name} ({skill.student?.id}) - {majorMap[skill.student?.major] || skill.student?.major}</Text>
-                {skill.attachmentCid && (
-                  <Text mt="xs" size="sm">
-                    <a href={`https://ipfs.io/ipfs/${skill.attachmentCid}`} target="_blank" rel="noreferrer">View Document</a>
+      return (
+        <Box key={skill.id} ref={(el) => (skillRefs.current[skill.id] = el)}>
+          <Paper p="md" radius="md" shadow="xs" withBorder mb="lg">
+            {/* 顶栏：标题 + Back */}
+            <Group justify="space-between" align="center" mb="xs">
+              <Title order={4}>
+                {skill.title}{' '}
+                <Text component="span" c="dimmed">
+                  ({skill.level})
+                </Text>
+              </Title>
+              <Button variant="light" onClick={() => setSelectedSkillId(null)}>
+                <IconChevronLeft size={14} style={{ marginRight: 4 }} />
+                Back
+              </Button>
+            </Group>
+
+            <Text size="sm" c="dimmed" mb={4}>
+              Course: {skill.courseTitle} ({skill.courseCode})
+            </Text>
+            <Text size="sm" mb="xs">
+              Student: {skill.student?.name} ({skill.student?.id}) –{' '}
+              {majorMap[skill.student?.major] || skill.student?.major}
+            </Text>
+            {skill.attachmentCid && (
+              <Text size="sm" mb="xs">
+                <a
+                  href={`https://ipfs.io/ipfs/${skill.attachmentCid}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View&nbsp;Document
+                </a>
+              </Text>
+            )}
+
+            <Divider my="sm" />
+
+            <Stack gap="sm">
+              {/* 决策下拉框 */}
+              <Select
+                label="Approval Decision"
+                value={state?.decision || ''}
+                data={[
+                  { value: 'approved', label: 'Approve' },
+                  { value: 'rejected', label: 'Reject' },
+                ]}
+                onChange={(val) =>
+                  setFormState((prev) => ({
+                    ...prev,
+                    [skill.id]: { ...prev[skill.id], decision: val },
+                  }))
+                }
+              />
+
+              {/* 只有 approve 时才展开打分区 */}
+              <Collapse in={decision === 'approved'}>
+                {/* Hard Skills */}
+                <Title order={6} mt="sm" mb={4}>
+                  Hard Skills
+                </Title>
+                {skill.hardSkills.length === 0 ? (
+                  <Text size="sm" c="dimmed" mb="sm">
+                    No hard skills defined for this course.
                   </Text>
+                ) : (
+                  <SimpleGrid cols={2} spacing="xs" mb="sm">
+                    {skill.hardSkills.map((hard) => (
+                      <NumberInput
+                        key={hard}
+                        label={hard}
+                        min={0}
+                        max={5}
+                        precision={1}
+                        value={state?.hardSkillScores?.[hard]?.score || ''}
+                        onChange={(val) =>
+                          handleScoreChange(skill.id, 'hardSkillScores', hard, 'score', val)
+                        }
+                      />
+                    ))}
+                  </SimpleGrid>
                 )}
 
-                <Divider my="sm" />
+                {/* Soft Skills */}
+                <Title order={6} mb={4}>
+                  Soft Skills
+                </Title>
+                <SimpleGrid cols={2} spacing="xs">
+                  {skill.softSkills?.map((softId) => (
+                    <NumberInput
+                      key={softId}
+                      label={softSkillMap[softId] || softId}
+                      min={0}
+                      max={5}
+                      precision={1}
+                      value={state?.softSkillScores?.[softId]?.score || ''}
+                      onChange={(val) =>
+                        handleScoreChange(skill.id, 'softSkillScores', softId, 'score', val)
+                      }
+                    />
+                  ))}
+                </SimpleGrid>
+              </Collapse>
 
-                <Stack>
-                  <Select
-                    label="Approval Decision"
-                    placeholder="Select"
-                    value={state?.decision || ""}
-                    onChange={(val) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        [skill.id]: { ...prev[skill.id], decision: val },
-                      }))
-                    }
-                    data={[
-                      { value: "approved", label: "Approve" },
-                      { value: "rejected", label: "Reject" },
-                    ]}
-                  />
+              {/* Note & Submit */}
+              <Textarea
+                label="Feedback"
+                value={state?.note || ''}
+                onChange={(e) =>
+                  setFormState((prev) => ({
+                    ...prev,
+                    [skill.id]: { ...prev[skill.id], note: e.target.value },
+                  }))
+                }
+              />
+              <Button color="green" onClick={() => handleReview(skill.id)}>
+                Submit Review
+              </Button>
+            </Stack>
+          </Paper>
+        </Box>
+      );
 
-                  <Collapse in={decision === "approved"}>
-                    <div>
-                      <Title order={5} mt="md">Hard Skills</Title>
-                      {skill.hardSkills.length === 0 ? (
-                        <Text size="sm" c="dimmed">No hard skills defined for this course.</Text>
-                      ) : (
-                        skill.hardSkills.map((hard) => (
-                          <Stack key={hard}>
-                            <Text fw={500}>{hard}</Text>
-                            <NumberInput
-                              label="Score (0–5)"
-                              min={0}
-                              max={5}
-                              precision={1}
-                              value={state?.hardSkillScores?.[hard]?.score || ""}
-                              onChange={(val) =>
-                                handleScoreChange(skill.id, "hardSkillScores", hard, "score", val)
-                              }
-                            />
-                            <Textarea
-                              label="Comment"
-                              value={state?.hardSkillScores?.[hard]?.comment || ""}
-                              onChange={(e) =>
-                                handleScoreChange(skill.id, "hardSkillScores", hard, "comment", e.target.value)
-                              }
-                            />
-                          </Stack>
-                        ))
-                      )}
-
-                      <Divider my="sm" />
-
-                      <Title order={5}>Soft Skills</Title>
-                      {skill.softSkills?.map((softId) => (
-                        <Stack key={softId}>
-                          <Text fw={500}>{softSkillMap[softId] || softId}</Text>
-                          <NumberInput
-                            label="Score (0–5)"
-                            min={0}
-                            max={5}
-                            precision={1}
-                            value={state?.softSkillScores?.[softId]?.score || ""}
-                            onChange={(val) =>
-                              handleScoreChange(skill.id, "softSkillScores", softId, "score", val)
-                            }
-                          />
-                          <Textarea
-                            label="Comment"
-                            value={state?.softSkillScores?.[softId]?.comment || ""}
-                            onChange={(e) =>
-                              handleScoreChange(skill.id, "softSkillScores", softId, "comment", e.target.value)
-                            }
-                          />
-                        </Stack>
-                      ))}
-                    </div>
-                  </Collapse>
-
-
-                  <Textarea
-                    label="Overall Note"
-                    placeholder="General feedback..."
-                    value={state?.note || ""}
-                    onChange={(e) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        [skill.id]: {
-                          ...prev[skill.id],
-                          note: e.target.value,
-                        },
-                      }))
-                    }
-                  />
-
-                  <Group mt="xs">
-                    <Button color="green" onClick={() => handleReview(skill.id)}>
-                      Submit Review
-                    </Button>
-                  </Group>
-                </Stack>
-              </Paper>
-            </Box>
-          );
         })
       )}
     </Box>

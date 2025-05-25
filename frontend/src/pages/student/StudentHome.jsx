@@ -9,8 +9,6 @@ import {
 } from "@mantine/core";
 import {
   collection,
-  doc,
-  getDoc,
   getDocs,
   query,
   where,
