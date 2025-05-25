@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Group,
@@ -8,17 +8,33 @@ import {
   Textarea,
   NumberInput,
   Badge,
+  MultiSelect
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useNavigate } from 'react-router-dom';
 import { createJob } from '../../services/jobService';
 import { useAuth } from '../../context/AuthContext';
+import { fetchSoftSkills } from '../../services/jobService';
 
 const AddJobPage = () => {
   const navigate = useNavigate();
   const { user, role, token } = useAuth();
 
   const [currentSkill, setCurrentSkill] = useState('');
+  const [softSkills, setSoftSkills] = useState([]);
+
+  useEffect(() => {
+    const loadSoftSkills = async () => {
+      try {
+        const skills = await fetchSoftSkills(token);
+        setSoftSkills(skills.map(s => ({ value: s.id, label: s.name })));
+      } catch (err) {
+        console.error("Failed to load soft skills:", err);
+      }
+    };
+
+    loadSoftSkills();
+  }, [token]);
 
   const form = useForm({
     initialValues: {
@@ -27,6 +43,7 @@ const AddJobPage = () => {
       location: '',
       price: 0,
       skills: [],
+      softSkills: [],
     },
     validate: {
       title: (value) => (value ? null : 'Title is required'),
@@ -154,6 +171,19 @@ const AddJobPage = () => {
             {form.errors.skills}
           </Box>
         )}
+
+      <MultiSelect
+        mt="lg"
+        data={softSkills}
+        label="Soft Skills"
+        placeholder="Select soft skills"
+        value={form.values.softSkills}
+        onChange={(value) => form.setFieldValue('softSkills', value)}
+        searchable
+        clearable
+        nothingFound="No soft skills found"
+      />
+
 
         <Button type="submit" mt="xl" fullWidth>
           Submit Job

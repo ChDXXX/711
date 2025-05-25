@@ -1,158 +1,151 @@
-import React, { useEffect, useState } from "react";
 import {
-  Box,
-  Button,
-  TextInput,
-  Textarea,
-  Title,
-  Group,
-  Loader,
-  FileInput,
-  Image,
-  Notification,
+  Box, Title, Switch, Group, Divider, Button, Text,
+  Stack, Paper, TextInput, Notification, Select
 } from "@mantine/core";
+import {
+  IconCheck, IconMail, IconKey, IconLanguage
+} from "@tabler/icons-react";
+import { useEffect, useState } from "react";
+import { auth, db } from "../../firebase";
 import { useAuth } from "../../context/AuthContext";
-import axios from "axios";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { IconCheck } from "@tabler/icons-react";
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { sendPasswordResetEmail, updateEmail } from "firebase/auth";
+import { useTranslation } from "react-i18next";
 
 export default function EmployerSettings() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [email, setEmail] = useState("");
-  const [companyType, setCompanyType] = useState("");
-  const [description, setDescription] = useState("");
-  const [logoFile, setLogoFile] = useState(null);
-  const [logoPreview, setLogoPreview] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [success, setSuccess] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [notifyByEmail, setNotifyEmail] = useState(false);
+  const [language, setLanguage] = useState("en");
+  const [theme, setTheme] = useState("light");
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (user) loadSettings();
   }, [user]);
 
   const loadSettings = async () => {
-    setLoading(true);
-    try {
-      const token = await user.getIdToken();
-      const res = await axios.get(`${BASE_URL}/user/${user.uid}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const data = res.data;
-      setEmail(data.email || "");
-      setCompanyType(data.companyType || "");
-      setDescription(data.companyDescription || "");
-      setLogoPreview(data.logoUrl || "");
-    } catch (err) {
-      console.error("Failed to load settings:", err);
-    } finally {
-      setLoading(false);
+    const docRef = doc(db, "users", user.uid);
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      setEmail(data.email || user.email);
+      setNewEmail(data.email || user.email);
+      setNotifyEmail(data.notifyByEmail || false);
+      setLanguage(data.language || "en");
+      setTheme(data.theme || "light");
     }
   };
 
   const handleSave = async () => {
-    try {
-      const token = await user.getIdToken();
-      let logoUrl = logoPreview;
+    const ref = doc(db, "users", user.uid);
+    await updateDoc(ref, {
+      notifyByEmail,
+      language,
+      theme,
+      email: newEmail,
+    });
 
-      if (logoFile) {
-        const storage = getStorage();
-        const storageRef = ref(storage, `logos/${user.uid}`);
-        const snapshot = await uploadBytes(storageRef, logoFile);
-        logoUrl = await getDownloadURL(snapshot.ref);
+    if (newEmail !== user.email) {
+      try {
+        await updateEmail(user, newEmail);
+      } catch (err) {
+        console.error("Email update failed:", err.message);
+        alert("Failed to update email. Please re-authenticate.");
       }
+    }
 
-      await axios.put(
-        `${BASE_URL}/user/update`,
-        {
-          email,
-          companyType,
-          companyDescription: description,
-          logoUrl,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+    localStorage.setItem("i18nextLng", language);
+    window.location.reload();
 
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  };
+
+  const handleResetPassword = async () => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert(t("resetSuccess"));
     } catch (err) {
-      console.error("Failed to save settings:", err);
+      alert(t("resetFail") + ": " + err.message);
     }
   };
 
-  if (loading) {
-    return (
-      <Box mt="xl">
-        <Loader />
-      </Box>
-    );
-  }
-
   return (
-    <Box mt="md" maw={600}>
-      <Title order={2} mb="md">
-        Employer Settings
-      </Title>
+    <Box mt="xl">
+      <Title order={2}>{t("settings")}</Title>
 
-      {success && (
-        <Notification icon={<IconCheck size={18} />} color="teal" mb="md">
-          Settings updated successfully!
-        </Notification>
-      )}
+      <Paper withBorder shadow="xs" p="md" mt="md">
+        <Stack spacing="md">
+          <TextInput
+            label={t("email")}
+            icon={<IconMail size={16} />}
+            value={newEmail}
+            onChange={(e) => setNewEmail(e.currentTarget.value)}
+          />
 
-      <TextInput
-        label="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        mb="sm"
-      />
+          <Group position="apart">
+            <Group>
+              <IconMail size={18} />
+              <Text>{t("notifications")}</Text>
+            </Group>
+            <Switch
+              checked={notifyByEmail}
+              onChange={(e) => setNotifyEmail(e.currentTarget.checked)}
+            />
+          </Group>
 
-      <TextInput
-        label="Company Type"
-        value={companyType}
-        onChange={(e) => setCompanyType(e.target.value)}
-        mb="sm"
-      />
+          <Divider />
 
-      <Textarea
-        label="Company Description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        autosize
-        minRows={3}
-        mb="sm"
-      />
+          <Group position="apart">
+            <Group>
+              <IconLanguage size={18} />
+              <Text>{t("language")}</Text>
+            </Group>
+            <Select
+              data={[
+                { value: "en", label: "English" },
+                { value: "zh", label: "中文" },
+              ]}
+              value={language}
+              onChange={setLanguage}
+              style={{ width: 160 }}
+            />
+          </Group>
 
-      <FileInput
-        label="Upload Company Logo"
-        placeholder="Select image (PNG, JPG)"
-        accept="image/png,image/jpeg"
-        value={logoFile}
-        onChange={(file) => {
-          setLogoFile(file);
-          if (file) setLogoPreview(URL.createObjectURL(file));
-        }}
-        mb="sm"
-      />
+          <Group position="apart">
+            <Group>
+              <IconKey size={18} />
+              <Text>{t("theme")}</Text>
+            </Group>
+            <Select
+              data={[
+                { value: "light", label: t("light", "Light") },
+                { value: "dark", label: t("dark", "Dark") },
+              ]}
+              value={theme}
+              onChange={setTheme}
+              style={{ width: 160 }}
+            />
+          </Group>
 
-      {logoPreview && (
-        <Image
-          src={logoPreview}
-          alt="Company Logo"
-          width={120}
-          height={120}
-          radius="md"
-          mb="sm"
-        />
-      )}
+          <Divider />
 
-      <Group mt="md">
-        <Button onClick={handleSave}>Save Settings</Button>
-      </Group>
+          <Button variant="default" onClick={handleResetPassword}>
+            {t("resetPassword")}
+          </Button>
+
+          <Button color="blue" onClick={handleSave}>
+            {t("save")}
+          </Button>
+
+          {saved && (
+            <Notification icon={<IconCheck />} color="teal" title={t("saveSuccess")} />
+          )}
+        </Stack>
+      </Paper>
     </Box>
   );
 }

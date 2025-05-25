@@ -25,6 +25,7 @@ const StudentPage = () => {
 const navbarData = [
   { link: "", labelKey: "navbar.home", icon: IconHome2 },
   { link: "request-skill", labelKey: "navbar.requestSkill", icon: IconClipboardList },
+  { link: "assigned-jobs", labelKey: "Job Board", icon: IconBriefcase },
   { link: "settings", labelKey: "navbar.settings", icon: IconSettings },
 ];
   return (

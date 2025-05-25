@@ -20,3 +20,19 @@ export async function getSchoolOptions() {
   const res = await axios.get(`${BASE_URL}/employer/schools`);
   return res.data;
 }
+
+export const searchStudentsBySkills = async (techSkills = [], softSkills = [], token) => {
+  const params = new URLSearchParams();
+  if (techSkills.length) params.append("techSkills", techSkills.join(","));
+  if (softSkills.length) params.append("softSkills", softSkills.join(","));
+
+  try {
+    const response = await axios.get(`${BASE_URL}/employer/search-students?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error searching students:", error);
+    throw error;
+  }
+};

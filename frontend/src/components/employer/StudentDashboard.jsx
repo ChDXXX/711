@@ -19,6 +19,7 @@ const StudentDashboard = ({
     name: 'Unknown',
     university: 'Unknown',
     major: 'Unknown',
+    email : 'Unknown',
     image: '',
     passedCourses: [],
     softSkills: [],
@@ -31,13 +32,14 @@ const StudentDashboard = ({
       <Group justify="space-between" align="flex-start" mb="md">
         <Box>
           <Text fw={700} size="lg">{student.name}'s Wallet Dashboard</Text>
-          <Text>University: {student.university}</Text>
-          <Text>Major: {student.major}</Text>
+          <Text>University: {student.schoolName}</Text>
+          <Text>Major: {student.majorName}</Text>
+          <Text>Email: {student.email}</Text>
         </Box>
         <Avatar size={80} src={student.image} />
       </Group>
 
-      {/* Courses Passed */}
+      {/* Courses Passed
       <Box mb="md">
         <Text fw={600} mb={4}>Courses Passed</Text>
         <ul style={{ paddingLeft: 16 }}>
@@ -46,8 +48,9 @@ const StudentDashboard = ({
           ))}
         </ul>
       </Box>
+       */}
 
-      {/* Soft Skills */}
+      {/* Soft Skills 
       <Box mb="md">
         <Text fw={600} mb="xs">Soft Skills</Text>
         <Stack gap="sm">
@@ -77,33 +80,44 @@ const StudentDashboard = ({
           })}
         </Stack>
       </Box>
+      */}
 
       {/* Technical Skills */}
       <Box mb="md">
         <Text fw={600} mb="xs">Technical Skills</Text>
-        <Group spacing="xs" wrap="wrap">
-          {(student.techSkills || []).map((skillObj, idx) => {
-            return (
-              <Box
-                key={idx}
-                style={{
-                  border: '1px solid #ccc',
-                  borderRadius: 8,
-                  padding: '8px 12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  userSelect: 'none',
-                }}
-              >
-                {skillIconMap[skillObj.skill]}
-                <Text>{skillObj.skill}</Text>
-                <Text color="dimmed">({skillObj.grade}/5)</Text>
-              </Box>
-            );
-          })}
+        <Stack gap="sm">
+          {(student.skills || []).map((skillObj, idx) => (
+            <Box
+              key={idx}
+              style={{
+                border: '1px solid #ccc',
+                borderRadius: 8,
+                padding: '12px',
+              }}
+            >
+              <Group spacing="xs" align="center">
+                <Text fw={500}>{skillObj.title}</Text>
+                {skillObj.level && (
+                  <Text size="xs" c="dimmed">({skillObj.level})</Text>
+                )}
+              </Group>
 
-        </Group>
+              {/* Show soft skills under this technical skill */}
+              {Array.isArray(skillObj.softSkillTitles) && skillObj.softSkillTitles.length > 0 && (
+                <Box ml="md" mt="xs">
+                  <Text size="sm" fw={500} c="dimmed">Related Soft Skills:</Text>
+                  <ul style={{ paddingLeft: 16 }}>
+                    {skillObj.softSkillTitles.map((ss, i) => (
+                      <li key={i}>
+                        <Text size="sm" c="gray.7">• {ss}</Text>
+                      </li>
+                    ))}
+                  </ul>
+                </Box>
+              )}
+            </Box>
+          ))}
+        </Stack>
       </Box>
     </Box>
   );

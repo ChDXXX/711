@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "../firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, onIdTokenChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import i18n from "../i18n"; // 多语言支持
 
@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (currentUser) => {
+    const unsub = onIdTokenChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
         const token = await currentUser.getIdToken();
