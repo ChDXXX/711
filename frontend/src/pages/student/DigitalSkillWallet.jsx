@@ -210,7 +210,7 @@ const softSkillCounts = () => {
         </Group>
 
         {/* Full list */}
-        <WalletSkillCard skills={skills} />
+        <WalletSkillCard skills={skills} softSkillMap={softSkillMap} />
 
         <Group align="center" gap="sm" mb="sm">
           <Text fw={600} size="lg">
