@@ -1,11 +1,12 @@
 import express from "express";
 import admin from "firebase-admin";
 import { verifyRole } from "../middlewares/verifyRole.js";
+import { verifyRoleSimple } from "../middlewares/verifyRole-simple.js";
 
 const router = express.Router();
 
 // 获取所有专业（允许 teacher 与 school）
-router.get("/majors", verifyRole(["school", "teacher"]), async (req, res) => {
+router.get("/majors", verifyRoleSimple(["school", "teacher"]), async (req, res) => {
   try {
     const snapshot = await admin.firestore().collection("majors").get();
     const majors = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -17,7 +18,7 @@ router.get("/majors", verifyRole(["school", "teacher"]), async (req, res) => {
 });
 
 // 获取本校所有学生
-router.get("/students", verifyRole(["school", "teacher"]), async (req, res) => {
+router.get("/students", verifyRoleSimple(["school", "teacher"]), async (req, res) => {
   try {
     const snapshot = await admin.firestore()
       .collection("users")
@@ -34,7 +35,7 @@ router.get("/students", verifyRole(["school", "teacher"]), async (req, res) => {
 });
 
 // 获取某个学生技能
-router.get("/student/:id/skills", verifyRole(["school", "teacher"]), async (req, res) => {
+router.get("/student/:id/skills", verifyRoleSimple(["school", "teacher"]), async (req, res) => {
   const studentId = req.params.id;
 
   try {
@@ -61,7 +62,7 @@ router.get("/student/:id/skills", verifyRole(["school", "teacher"]), async (req,
 });
 
 // 获取本校教师
-router.get("/teachers", verifyRole(["school", "teacher"]), async (req, res) => {
+router.get("/teachers", verifyRoleSimple(["school", "teacher"]), async (req, res) => {
   try {
     const snapshot = await admin.firestore()
       .collection("users")
@@ -78,7 +79,7 @@ router.get("/teachers", verifyRole(["school", "teacher"]), async (req, res) => {
 });
 
 // 获取本校课程
-router.get("/courses", verifyRole(["school", "teacher"]), async (req, res) => {
+router.get("/courses", verifyRoleSimple(["school", "teacher"]), async (req, res) => {
   try {
     const snapshot = await admin.firestore()
       .collection("courses")
@@ -94,7 +95,7 @@ router.get("/courses", verifyRole(["school", "teacher"]), async (req, res) => {
 });
 
 // 获取课程下所有学生技能记录（附带学生信息）
-router.get("/course/:courseId/students", verifyRole(["school", "teacher"]), async (req, res) => {
+router.get("/course/:courseId/students", verifyRoleSimple(["school", "teacher"]), async (req, res) => {
   const courseId = req.params.courseId;
 
   try {
@@ -132,7 +133,7 @@ router.get("/course/:courseId/students", verifyRole(["school", "teacher"]), asyn
 });
 
 // 获取课程详情（包含创建教师信息）
-router.get("/course/:courseId/details", verifyRole(["school", "teacher"]), async (req, res) => {
+router.get("/course/:courseId/details", verifyRoleSimple(["school", "teacher"]), async (req, res) => {
   const courseId = req.params.courseId;
 
   try {
@@ -162,7 +163,7 @@ router.get("/course/:courseId/details", verifyRole(["school", "teacher"]), async
 });
 
 // 当前教师创建的课程
-router.get("/my-courses", verifyRole(["school", "teacher"]), async (req, res) => {
+router.get("/my-courses", verifyRoleSimple(["school", "teacher"]), async (req, res) => {
   try {
     const snapshot = await admin.firestore()
       .collection("courses")
@@ -178,7 +179,7 @@ router.get("/my-courses", verifyRole(["school", "teacher"]), async (req, res) =>
 });
 
 // 获取当前学校的待审核技能
-router.get("/pending-skills", verifyRole(["school", "teacher"]), async (req, res) => {
+router.get("/pending-skills", verifyRoleSimple(["school", "teacher"]), async (req, res) => {
   try {
     const snapshot = await admin.firestore()
       .collection("skills")

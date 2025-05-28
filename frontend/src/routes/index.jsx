@@ -13,13 +13,13 @@ import Services from '../pages/Services'
 import ErrorPage from '../pages/ErrorPage';
 
 
+
 // Student
 import StudentPage from "../pages/student/StudentPage";
 import StudentHome from '../pages/student/StudentHome';
 import StudentRequestSkill from '../pages/student/StudentRequestSkill';
 import StudentSettings from '../pages/student/StudentSettings';
 import DigitalSkillWallet from '../pages/student/DigitalSkillWallet';
-import AssignedJobs from '../pages/student/AssignedJobs'; 
 
 import JobDetail from '../pages/student/JobDetail'; 
 import MyJobApplications from '../pages/student/MyJobApplications'; 
@@ -39,7 +39,6 @@ import AddJobPage from "../pages/employer/AddJobPage";
 import EditJobPage from "../pages/employer/EditJobPage";
 import EmployerMessagesPage from '../pages/employer/EmployerMessagesPage';
 import EmployerStudentsList from '../pages/employer/EmployerStudentsList';
-import EmployerSettings from '../pages/employer/EmployerSettings'; 
 
 // Admin
 import AdminPage from "../pages/AdminPage";
@@ -68,7 +67,6 @@ const AppRouter = createBrowserRouter([
         { path: "settings", element: <StudentSettings /> },       
         { path: "job/:jobId", element: <JobDetail /> },
         { path: "job", element: <JobDetail /> }, 
-        { path: "assigned-jobs", element: <AssignedJobs /> },
         { path: "applications", element: <MyJobApplications /> },   // 加入
       ]
     },
@@ -97,9 +95,6 @@ const AppRouter = createBrowserRouter([
             { path: "edit-job/:jobId", element: <EditJobPage /> },
             { path: "messages", element: <EmployerMessagesPage /> },
             { path: "students-list", element: <EmployerStudentsList /> },
-            { path: "settings", element: <EmployerSettings /> },
-            
-            
         ]
       },
 

@@ -1,13 +1,14 @@
 import express from "express";
 import admin from "firebase-admin";
 
-import { verifyStudent, verifyEmployer, verifyTeacher } from "../middlewares/verifyRole.js"; 
+import { verifyStudent, verifyEmployer, verifyTeacher } from "../middlewares/verifyRole.js";
+import { verifyStudentSimple, verifyRoleSimple } from "../middlewares/verifyRole-simple.js"; 
 
 const router = express.Router();
 const FieldValue = admin.firestore?.FieldValue ?? null;
 
 // POST /skill/add
-router.post("/add", verifyStudent, async (req, res) => {
+router.post("/add", verifyStudentSimple, async (req, res) => {
   const { role, uid } = req.user;
   const { courseId, attachmentCid, level, softSkills } = req.body;
 
@@ -68,7 +69,7 @@ router.post("/add", verifyStudent, async (req, res) => {
 });
 
 // GET /skill/list
-router.get("/list", verifyStudent, async (req, res) => {
+router.get("/list", verifyStudentSimple, async (req, res) => {
   const { uid } = req.user;
 
   try {
@@ -111,7 +112,7 @@ router.get("/list", verifyStudent, async (req, res) => {
 
 
 // GET /skill/approved
-router.get("/approved", verifyEmployer, async (req, res) => {
+router.get("/approved", verifyRoleSimple(["employer"]), async (req, res) => {
   try {
     const snapshot = await admin.firestore()
       .collection("skills")
@@ -144,7 +145,7 @@ router.get("/approved", verifyEmployer, async (req, res) => {
 });
 
 // DELETE /skill/delete/:id
-router.delete("/delete/:id", verifyStudent, async (req, res) => {
+router.delete("/delete/:id", verifyStudentSimple, async (req, res) => {
   const { uid } = req.user;
   const skillId = req.params.id;
 

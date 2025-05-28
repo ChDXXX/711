@@ -5,7 +5,6 @@ import {
   IconCertificate,
   IconClipboardList,
   IconSettings,
-  IconUsers
   } from '@tabler/icons-react';
 import { Navigate, Outlet } from "react-router-dom";  
 
@@ -22,26 +21,37 @@ const EmployerPage = () => {
   if (!user || role !== "employer") return <Navigate to="/" />;
 
   const navbarData = [
-    { link: '.', labelKey: 'Home', icon: IconHome2 },
-    { link: 'jobs-list', labelKey: 'Jobs List', icon: IconClipboardList },
-    { link: 'students-list', labelKey: 'Students', icon: IconUsers },
-    { link: 'settings', labelKey: 'Settings', icon: IconSettings }
-    
+    { link: '.', label: 'Home', icon: IconHome2 },
+    { link: 'jobs-list', label: 'Jobs List', icon: IconClipboardList },
+    { link: '', label: 'Settings', icon: IconSettings },
+    { link: 'messages', label: 'Messages', icon: IconCertificate },
   ];
 
   return (
-  <Container size="xl" maw="1500px">
-        <Group align="flex-start" noWrap>
-          {/* Left: Navbar */}
-          <Box >
-            <HomeNavbar userData={userData} navbarData={navbarData} />
-          </Box>
+    <Container size="xl" maw={1400} px="md">
+      <Box
+      style={{ display: "flex", minHeight: "100vh", overflowX: "hidden", gap: "20px" }}
+        sx={(theme) => ({
+          display: "flex",
+          flexDirection: "column",
+          gap: theme.spacing.md,
 
-          {/* Right: Main content area */}
-          <Box style={{ flex: 1, minHeight: "100vh", padding: "20px" }}>
-            <Outlet />
-          </Box>
-        </Group>
+          [theme.fn.largerThan("md")]: {
+            flexDirection: "row",
+            alignItems: "flex-start",
+          },
+        })}
+      >
+        {/* Navbar */}
+        <Box>
+          <HomeNavbar userData={userData} navbarData={navbarData} />
+        </Box>
+
+        {/* Main content */}
+        <Box style={{padding: "20px", maxWidth: "100%", overflowX: "auto" }}>
+          <Outlet />
+        </Box>
+      </Box>
     </Container>
   );
 };

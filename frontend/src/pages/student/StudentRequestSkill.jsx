@@ -176,26 +176,48 @@ const fetchTeachers = async () => {
   };
 
   const fetchCourses = async (schoolId, majorId) => {
-    const token = await user.getIdToken();
-    const res = await axios.get(`${BASE_URL}/student/list-courses`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setCourseList(
-  res.data.filter((c) => {
-    const courseMajorId = typeof c.major === "object" && c.major.id ? c.major.id : c.major;
-    return c.schoolId === schoolId && courseMajorId === majorId;
-  })
-);
+    try {
+      const token = await user.getIdToken();
+      console.log("🔍 Fetching courses for:", { schoolId, majorId });
+      
+      const res = await axios.get(`${BASE_URL}/student/list-courses`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      console.log("📋 Raw courses from backend:", res.data.length);
+      setCourseList(res.data); // 直接使用后端返回的数据，不再前端过滤
+      console.log("✅ Courses set successfully:", res.data.length, "items");
+    } catch (err) {
+      console.error("❌ Failed to fetch courses:", err);
+      setCourseList([]);
+    }
   };
 
   const fetchSkills = async () => {
     setIsFetching(true);
     try {
+      console.log("🔍 Fetching skills...");
+      console.log("User:", user ? "✅ Logged in" : "❌ Not logged in");
+      
+      if (!user) {
+        console.error("❌ No user found, cannot fetch skills");
+        return;
+      }
+      
       const token = await user.getIdToken();
+      console.log("🎫 Token obtained:", token ? "✅ Success" : "❌ Failed");
+      console.log("🌐 API Base URL:", import.meta.env.DEV ? 'http://localhost:5001/digital-skill-wallet/us-central1/api' : 'Cloud');
+      
       const res = await listSkills(token);
       setSkills(res);
+      console.log("✅ Skills fetched successfully:", res.length, "items");
     } catch (err) {
-      console.error("Failed to fetch skills:", err);
+      console.error("❌ Failed to fetch skills:", err);
+      console.error("Error details:", {
+        message: err.message,
+        code: err.code,
+        config: err.config
+      });
     } finally {
       setIsFetching(false);
     }
@@ -385,7 +407,7 @@ const fetchTeachers = async () => {
               data={Object.entries(softSkillMap).map(([id, name]) => ({ value: id, label: name }))}
               value={form.softSkills}
               onChange={(v) => setForm({ ...form, softSkills: v })}
-              maxSelectedValues={5}
+              limit={5}
             />
             <FileInput
               label={t("request.file")}

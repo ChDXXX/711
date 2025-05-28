@@ -21,6 +21,17 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    host: 'localhost',
+    hmr: {
+      port: 3001,
+    },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5001/digital-skill-wallet/us-central1',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   optimizeDeps: {
     include: [

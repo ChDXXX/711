@@ -1,18 +1,11 @@
 import { Avatar, Box, Group, Text } from "@mantine/core"
-import classes from "./Button.module.css"
+import classes from "./UserButton.module.css"
 
 export function UserButton({ collapsed, name, role, image }) {
   return (
     <Box className={classes.user}>
       <Group>
-      <Avatar
-        src={image || null}
-        color="white"
-        radius="xl"
-        bg={"dark"}
-      >
-        {(!image && name) ? name.slice(0, 2).toUpperCase() : null}
-      </Avatar>
+        <Avatar src={image} radius="xl" />
         {!collapsed && (
           <div style={{ flex: 1 }}>
             <Text size="sm" fw={500}>
