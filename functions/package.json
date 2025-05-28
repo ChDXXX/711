@@ -17,9 +17,9 @@
     "express-fileupload": "^1.5.1",
     "firebase-admin": "^13.4.0",
     "firebase-functions": "^6.3.2",
-    "ipfs-http-client": "^60.0.1",
+    "ipfs-http-client": "^56.0.3",
     "multer": "^1.4.5-lts.2",
-    "mysql2": "^3.14.0",
+    "mysql2": "^3.14.1",
     "path-to-regexp": "^6.2.1"
   },
   "description": ""
