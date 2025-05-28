@@ -9,6 +9,7 @@ import {
   Button,
 } from "@mantine/core";
 import StudentDashboard from "./StudentDashboard";
+import { useNavigate } from 'react-router-dom';
 
 function StudentCard({
   id,
@@ -57,6 +58,7 @@ function StudentCard({
   const randomColor = bgColors[Math.floor(Math.random() * bgColors.length)];
   const selectedJobValue = assignedJobs[id] ?? null;
   const isModalOpen = openedModalId === studentId;
+  const navigate = useNavigate();
 
   return (
     <Card shadow="sm" radius="md" h="100%" withBorder style={{ maxWidth: 400 }}>
@@ -152,7 +154,8 @@ function StudentCard({
           fullWidth
           mt="xs"
           variant="light"
-          onClick={() => setOpenedModalId(studentId)}
+          /*onClick={() => setOpenedModalId(studentId)}*/
+          onClick={() => navigate(`/digital-skill-wallet/${studentId}`)}
         >
           Show Dashboard
         </Button>

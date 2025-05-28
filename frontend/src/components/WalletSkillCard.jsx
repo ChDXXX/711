@@ -18,11 +18,12 @@ import { IconAward, IconChecks } from '@tabler/icons-react';
 const levelValue = (lvl) =>
   lvl === 'Beginner' ? 33 : lvl === 'Intermediate' ? 66 : 100;
 
-export default function WalletSkillCard({ skills = [] }) {
+export default function WalletSkillCard({ skills = [], softSkillMap=[] }) {
   const theme = useMantineTheme();
 
   // 只取 “approved” 状态的技能
   const approved = skills.filter((skill) => skill.verified === 'approved');
+
 
   if (!approved.length) {
     return <Text align="center" c="dimmed">No approved skills to display.</Text>;
@@ -116,7 +117,7 @@ export default function WalletSkillCard({ skills = [] }) {
                     color="gray"
                     style={{ color: theme.white }}
                   >
-                    {tag}
+                    {softSkillMap[tag] || tag}
                   </Badge>
                 ))}
               </Group>
