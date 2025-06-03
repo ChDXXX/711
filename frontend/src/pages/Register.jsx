@@ -22,6 +22,7 @@ import { auth, db } from "../firebase";
 import { ethers } from "ethers";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import { registerStudentOnChain } from "../services/blockchain";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -117,6 +118,20 @@ export default function Register() {
       }
 
       await setDoc(doc(db, "users", user.uid), userData);
+      
+      // 上传学生数据到区块链
+      if (role === "student") {
+        const txHash = await registerStudentOnChain(
+          customUid,
+          user.email,
+          username,
+          schoolId,
+          wallet.address
+        );
+        console.log(`学生数据已上传到区块链，交易哈希: ${txHash}`);
+      }
+      // 上传学生数据到区块链
+
 
       setUser(user);
       setGlobalRole(role);
