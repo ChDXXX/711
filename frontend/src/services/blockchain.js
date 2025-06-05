@@ -134,7 +134,7 @@ export async function recordSkillOnChain(
     // Rethrow a more specific error or handle as needed
     if (error.code === 'ACTION_REJECTED') {
       // console.error("❌ Transaction failed. Receipt:", receipt);
-      throw new Error("用户拒绝了 MetaMask 中的交易请求。");
+      throw new Error("用户拒绝了中的交易请求。");
     } else if (error.message.includes("transaction failed")) {
       throw new Error(`区块链交易失败: ${error.message}`);
     } else {

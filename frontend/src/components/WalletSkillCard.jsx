@@ -108,25 +108,25 @@ export default function WalletSkillCard({ skills = [] }) {
         cid: skill.attachmentCid || skill.cid || ""
       };
       
-      console.log('📦 构造的验证数据 (WalletSkillCard):', skillDataForVerification);
+      console.log('📦 Constructed validation data (WalletSkillCard):', skillDataForVerification);
 
       const result = await verifySkillIntegrity(skillDataForVerification, skillId);
       setVerificationResults(prev => ({ ...prev, [skillId]: { ...result, loading: false } }));
 
       // Display alert message
       if (result.isValid) {
-        alert(`✅ 验证成功！\n\n数据库哈希: ${result.databaseHash?.substring(0, 16)}...\n区块链哈希: ${result.blockchainHash?.substring(0, 16)}...\n\n${result.message}`);
+        alert(`✅ Validation successful！\n\nDatabase hash: ${result.databaseHash?.substring(0, 16)}...\nBC hash: ${result.blockchainHash?.substring(0, 16)}...\n\n${result.message}`);
       } else {
-        alert(`❌ 验证失败！\n\n${result.message}\n\n数据库哈希: ${result.databaseHash?.substring(0, 16)}...\n区块链哈希: ${result.blockchainHash?.substring(0, 16)}...\n错误: ${result.error || '哈希值不匹配或未找到记录'}`);
+        alert(`❌ Validation unsuccessful!！\n\n${result.message}\n\nDatabase hash: ${result.databaseHash?.substring(0, 16)}...\nBC hash: ${result.blockchainHash?.substring(0, 16)}...\nError: ${result.error || 'Hash mismatch or record not found'}`);
       }
 
     } catch (error) {
-      console.error('验证过程出错 (WalletSkillCard):', error);
+      console.error('Validation process error (WalletSkillCard):', error);
       setVerificationResults(prev => ({
         ...prev,
-        [skillId]: { isValid: false, error: error.message, message: '验证过程出错', loading: false }
+        [skillId]: { isValid: false, error: error.message, message: 'Validation process error', loading: false }
       }));
-      alert(`❌ 验证过程出错: ${error.message}`);
+      alert(`❌ Validation process error: ${error.message}`);
     } finally {
       setVerifyingSkills(prev => {
         const newSet = new Set(prev);
@@ -246,9 +246,9 @@ export default function WalletSkillCard({ skills = [] }) {
                     size="sm"
                     style={{ fontWeight: 600 }}
                   >
-                    {currentResult?.loading ? "正在验证..." : 
-                     currentResult ? (currentResult.isValid ? "验证成功" : "验证失败") 
-                     : "验证技能数据"}
+                    {currentResult?.loading ? "Validation..." : 
+                     currentResult ? (currentResult.isValid ? "Validation successful!" : "Validation unsuccessful!") 
+                     : "Validation Skill"}
                   </Button>
                   {currentResult && !currentResult.loading && (
                     <Box 
@@ -266,7 +266,7 @@ export default function WalletSkillCard({ skills = [] }) {
                           <IconAlertCircle size={16} color="#dc3545" />
                         }
                         <Text fw={600} size="sm" color={currentResult.isValid ? "#00b46e" : "#dc3545"}>
-                          {currentResult.isValid ? "验证成功" : "验证失败"}
+                          {currentResult.isValid ? "Validation successful" : "Validation Unsuccessful"}
                         </Text>
                       </Group>
                       
@@ -276,13 +276,13 @@ export default function WalletSkillCard({ skills = [] }) {
                       
                       {!currentResult.isValid && currentResult.error && (
                         <Text size="xs" c="dimmed" mb={4}>
-                          错误信息: {typeof currentResult.error === 'object' ? JSON.stringify(currentResult.error) : currentResult.error}
+                          Error message: {typeof currentResult.error === 'object' ? JSON.stringify(currentResult.error) : currentResult.error}
                         </Text>
                       )}
                       
                       {currentResult.databaseHash && (
                         <Group spacing={4}>
-                          <Text size="xs" c="dimmed" fw={500}>数据库哈希:</Text>
+                          <Text size="xs" c="dimmed" fw={500}>Database hash:</Text>
                           <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
                             {currentResult.databaseHash.substring(0,12)}...
                           </Text>
@@ -291,7 +291,7 @@ export default function WalletSkillCard({ skills = [] }) {
                       
                       {currentResult.blockchainHash && (
                         <Group spacing={4}>
-                          <Text size="xs" c="dimmed" fw={500}>区块链哈希:</Text>
+                          <Text size="xs" c="dimmed" fw={500}>BC hash:</Text>
                           <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
                             {currentResult.blockchainHash.substring(0,12)}...
                           </Text>

@@ -147,23 +147,25 @@ router.get("/students/skills/:skill", verifyEmployerSimple, async (req, res) => 
   const { uid } = req.user;
 
   try {
-    console.log(`🔍 Backend: 雇主(${uid})查询技能: ${skill}, 软技能: ${softSkills || '无'}`);
-    
+    console.log(`🔍 Backend: Employer(${uid}) querying skill: ${skill}, soft skills: ${softSkills || 'None'}`);
+  
     // Step 1: Get all skills
-    console.log(`📚 Backend: 正在获取技能集合...`);
+    console.log(`📚 Backend: Retrieving skill collection...`);
     const skillSnapshot = await admin.firestore().collection("skills").get();
-    console.log(`📊 Backend: 找到${skillSnapshot.docs.length}个技能记录`);
+    console.log(`📊 Backend: Found ${skillSnapshot.docs.length} skill records`);
+
 
     // Step 2: Filter those matching the search term
-    console.log(`🔍 Backend: 正在过滤匹配的技能...`);
+    console.log(`🔍 Backend: Filtering matching skills...`);
     const matchedSkills = skillSnapshot.docs.filter(doc =>
-      doc.data().title.toLowerCase().includes(skill.toLowerCase())
+    doc.data().title.toLowerCase().includes(skill.toLowerCase())
     );
-    console.log(`✅ Backend: 找到${matchedSkills.length}个匹配的技能`);
+    console.log(`✅ Backend: Found ${matchedSkills.length} matching skills`);
 
-    // Step 3: Get unique ownerIds (student UIDs)
-    const ownerIds = [...new Set(matchedSkills.map(doc => doc.data().ownerId))];
-    console.log(`👥 Backend: 找到${ownerIds.length}个拥有匹配技能的学生ID`);
+// Step 3: Get unique ownerIds (student UIDs)
+const ownerIds = [...new Set(matchedSkills.map(doc => doc.data().ownerId))];
+console.log(`👥 Backend: Found ${ownerIds.length} student IDs with matching skills`);
+
 
     // Step 4: Build a map of studentId -> skill titles
     const studentSkillsMap = {};
@@ -174,7 +176,7 @@ router.get("/students/skills/:skill", verifyEmployerSimple, async (req, res) => 
     });
 
     // Step 5: Fetch student user documents
-    console.log(`🔄 Backend: 正在获取学生详细信息...`);
+    console.log(`🔄 Backend: Fetching student details...`);
     const students = [];
     for (const id of ownerIds) {
       const userDoc = await admin.firestore().collection("users").doc(id).get();
@@ -204,13 +206,13 @@ router.get("/students/skills/:skill", verifyEmployerSimple, async (req, res) => 
       }
     }
     
-    console.log(`✅ Backend: 找到${students.length}名符合条件的学生`);
+    console.log(`✅ Backend: Found ${students.length} students meeting the criteria`);
     
     // 返回前打印第一个学生的信息（如果有）作为调试
     if (students.length > 0) {
       const sample = {...students[0]};
       delete sample.email; // 不打印敏感信息
-      console.log(`📋 Backend: 样本学生数据:`, JSON.stringify(sample));
+      console.log(`📋 Backend: Sample student data:`, JSON.stringify(sample));
     }
 
     res.json(students);
@@ -380,17 +382,18 @@ router.get("/search-students", verifyEmployerSimple, async (req, res) => {
   const { uid } = req.user;
   
   try {
-    console.log(`🔍 Backend: 雇主(${uid})搜索学生: techSkills=${techSkills || '无'}, softSkills=${softSkills || '无'}`);
+    console.log(`🔍 Backend: Employer(${uid}) searching students: techSkills=${techSkills || 'None'}, softSkills=${softSkills || 'None'}`);
     
     // 将技能字符串转换为数组
     const techSkillsArray = techSkills ? techSkills.split(',').map(s => s.trim().toLowerCase()) : [];
     const softSkillsArray = softSkills ? softSkills.split(',') : [];
     
-    console.log(`📚 Backend: 技术技能: [${techSkillsArray.join(', ')}], 软技能: [${softSkillsArray.join(', ')}]`);
+    console.log(`📚 Backend: Technical skills: [${techSkillsArray.join(', ')}], Soft skills: [${softSkillsArray.join(', ')}]`);
+
     
     // 如果没有指定技能，返回所有学生
     if (techSkillsArray.length === 0 && softSkillsArray.length === 0) {
-      console.log(`🔍 Backend: 没有指定技能，返回所有学生`);
+      console.log(`🔍 Backend: No skills specified, returning all students`);
       const snapshot = await admin.firestore()
         .collection("users")
         .where("role", "==", "student")
@@ -439,7 +442,7 @@ router.get("/search-students", verifyEmployerSimple, async (req, res) => {
     }
     
     // 如果指定了技能，查找符合条件的学生
-    console.log(`🔍 Backend: 查询技能匹配的学生`);
+    console.log(`🔍 Backend: Querying students matching skills`);
     const skillSnapshot = await admin.firestore().collection("skills").get();
     
     // 过滤匹配技术技能的技能记录
@@ -451,11 +454,11 @@ router.get("/search-students", verifyEmployerSimple, async (req, res) => {
       return techSkillsArray.some(tech => skillTitle.includes(tech));
     });
     
-    console.log(`📊 Backend: 找到${matchedSkills.length}个匹配技能记录`);
+    console.log(`📊 Backend: Found ${matchedSkills.length} matching skill records`);
     
     // 提取学生ID并去重
     const studentIds = [...new Set(matchedSkills.map(doc => doc.data().ownerId))];
-    console.log(`👥 Backend: 找到${studentIds.length}个独立学生ID`);
+    console.log(`👥 Backend: Found ${studentIds.length} unique student IDs`);
     
     // 构建学生ID到技能的映射
     const studentSkillsMap = {};
@@ -507,16 +510,16 @@ router.get("/search-students", verifyEmployerSimple, async (req, res) => {
       }
     }
     
-    console.log(`✅ Backend: 返回${students.length}名符合条件的学生`);
-    if (students.length > 0) {
-      const sample = {...students[0]};
-      delete sample.email; // 不打印敏感信息
-      console.log(`📋 Backend: 样本学生数据:`, JSON.stringify(sample));
+    console.log(`✅ Backend: Returning ${students.length} students meeting the criteria`);
+if (students.length > 0) {
+  const sample = { ...students[0] };
+  delete sample.email; // Do not log sensitive information
+  console.log(`📋 Backend: Sample student data:`, JSON.stringify(sample));
     }
     
     res.json(students);
   } catch (error) {
-    console.error(`❌ Backend: 搜索学生失败:`, error.message);
+    console.error(`❌ Backend: Search students failed:`, error.message);
     res.status(500).send("Failed to search students");
   }
 });
@@ -526,7 +529,7 @@ router.get("/soft-skills", verifyEmployerSimple, async (req, res) => {
   const { uid } = req.user;
   
   try {
-    console.log(`🔍 Backend: 雇主(${uid})获取软技能列表`);
+    console.log(`🔍 Backend: Employer(${uid})fetching soft skills list`);
     
     // 首先尝试从Firestore获取软技能
     try {
@@ -538,29 +541,29 @@ router.get("/soft-skills", verifyEmployerSimple, async (req, res) => {
           name: doc.data().name
         }));
         
-        console.log(`✅ Backend: 从数据库获取到${softSkills.length}个软技能`);
+        console.log(`✅ Backend: Retrieved ${softSkills.length} soft skills from database`);
         return res.json(softSkills);
       }
     } catch (dbError) {
-      console.log("📝 Backend: 数据库查询失败，使用硬编码备选数据", dbError.message);
+      console.log("📝 Backend: Database query failed, using hardcoded fallback data", dbError.message);
     }
     
     // 如果数据库没有数据，则返回硬编码的软技能列表
     const defaultSoftSkills = [
-      { id: "communication", name: "沟通能力" },
-      { id: "teamwork", name: "团队合作" },
-      { id: "problemSolving", name: "解决问题能力" },
-      { id: "creativity", name: "创造力" },
-      { id: "leadership", name: "领导力" },
-      { id: "timeManagement", name: "时间管理" },
-      { id: "adaptability", name: "适应能力" },
-      { id: "criticalThinking", name: "批判性思维" }
-    ];
+  { id: "communication", name: "Communication" },
+  { id: "teamwork", name: "Teamwork" },
+  { id: "problemSolving", name: "Problem Solving" },
+  { id: "creativity", name: "Creativity" },
+  { id: "leadership", name: "Leadership" },
+  { id: "timeManagement", name: "Time Management" },
+  { id: "adaptability", name: "Adaptability" },
+  { id: "criticalThinking", name: "Critical Thinking" }
+];
     
-    console.log(`✅ Backend: 返回${defaultSoftSkills.length}个默认软技能`);
+    console.log(`✅ Backend: Returning ${defaultSoftSkills.length} default soft skills`);
     res.json(defaultSoftSkills);
   } catch (error) {
-    console.error(`❌ Backend: 获取软技能失败:`, error.message);
+    console.error(`❌ Backend: Failed to fetch soft skills:`, error.message);
     res.status(500).send("Failed to fetch soft skills");
   }
 });

@@ -42,7 +42,7 @@ async function getSkillHashFromBlockchain(skillData) {
       }
     } catch (error) { /* ignore */ }
 
-    console.log('📄 使用部署文件中的合约地址:', contractAddress);
+    console.log('📄 Using the contract address from the deployment file:', contractAddress);
 
     const recordKey = ethers.keccak256(
       ethers.solidityPacked(
@@ -120,20 +120,20 @@ async function getSkillHashFromBlockchain(skillData) {
     
     return found ? blockchainHash.slice(2) : null;
   } catch (error) {
-    console.error('获取区块链哈希值失败:', error);
+    console.error('Failed to retrieve blockchain hash value:', error);
     return null;
   }
 }
 
 // 验证数据库和区块链数据的一致性
 export async function verifySkillIntegrity(skillData, skillId) {
-  console.log('🔍 开始验证技能数据完整性...');
-  console.log('📊 技能数据:', skillData);
+  console.log('🔍 Starting validation of skill data integrity...');
+  console.log('📊 Skill data:', skillData);
   
   try {
     // 生成数据库哈希
     const databaseHash = createSkillHash(skillData);
-    console.log('🗄️ 数据库哈希值:', databaseHash);
+    console.log('🗄️ Database hash:', databaseHash);
     
     // 获取区块链哈希
     const blockchainHash = await getSkillHashFromBlockchain(skillData);
@@ -144,11 +144,11 @@ export async function verifySkillIntegrity(skillData, skillId) {
         databaseHash,
         blockchainHash: null,
         error: 'Record not found',
-        message: '链上未找到记录'
+        message: 'Record not found in blockchain'
       };
     }
     
-    console.log('⛓️ 区块链哈希值:', blockchainHash);
+    console.log('⛓️ BC hash:', blockchainHash);
     
     // 比较哈希值
     const isValid = databaseHash === blockchainHash;
@@ -157,14 +157,14 @@ export async function verifySkillIntegrity(skillData, skillId) {
       isValid,
       databaseHash,
       blockchainHash,
-      message: isValid ? '数据一致' : '数据不一致'
+      message: isValid ? 'Data consistent' : 'Data Unconsistent'
     };
   } catch (error) {
-    console.error('验证过程出错:', error);
+    console.error('Validation process error:', error);
     return {
       isValid: false,
       error: error.message,
-      message: '验证过程出错'
+      message: 'Validation process error'
     };
   }
 } 
