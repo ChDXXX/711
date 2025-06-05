@@ -6,6 +6,7 @@ echo ============================================================
 echo.
 
 
+
 echo [1/4] Starting Ganache Blockchain...
 echo IMPORTANT: If Ganache fails with a LockFile error, close all CMD windows,
 echo delete the 'ganache-db' folder in your project root, then rerun this script.

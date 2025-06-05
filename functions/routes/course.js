@@ -1,6 +1,7 @@
 import express from "express";
 import admin from "firebase-admin";
 import { verifyTeacher, verifyRole } from "../middlewares/verifyRole.js";
+import { verifyRoleSimple, verifyStudentSimple } from "../middlewares/verifyRole-simple.js";
 
 const router = express.Router();
 const FieldValue = admin.firestore.FieldValue;
@@ -17,7 +18,7 @@ async function resolveMajorName(majorRef) {
 }
 
 // POST /course/create
-router.post("/create", verifyTeacher, async (req, res) => {
+router.post("/create", verifyRoleSimple(["teacher", "school"]), async (req, res) => {
   const { title, code, major, skillTemplate, hardSkills } = req.body;
 
   if (!title || !code || !major || !skillTemplate?.skillTitle || !Array.isArray(hardSkills)) {
@@ -49,7 +50,7 @@ router.post("/create", verifyTeacher, async (req, res) => {
 });
 
 // PUT /course/update/:id
-router.put("/update/:id", verifyTeacher, async (req, res) => {
+router.put("/update/:id", verifyRoleSimple(["teacher", "school"]), async (req, res) => {
   const { title, code, major, skillTemplate, hardSkills } = req.body;
   const courseId = req.params.id;
 
@@ -81,7 +82,7 @@ router.put("/update/:id", verifyTeacher, async (req, res) => {
 });
 
 // DELETE /course/delete/:id
-router.delete("/delete/:id", verifyTeacher, async (req, res) => {
+router.delete("/delete/:id", verifyRoleSimple(["teacher", "school"]), async (req, res) => {
   const courseId = req.params.id;
 
   try {
@@ -101,7 +102,7 @@ router.delete("/delete/:id", verifyTeacher, async (req, res) => {
 });
 
 // GET /course/list-by-school
-router.get("/list-by-school", verifyRole(["school", "student"]), async (req, res) => {
+router.get("/list-by-school", verifyRoleSimple(["school", "student"]), async (req, res) => {
   const { role, schoolId, major } = req.user;
   if (!schoolId) return res.status(400).send("Missing schoolId");
 
@@ -134,7 +135,7 @@ router.get("/list-by-school", verifyRole(["school", "student"]), async (req, res
 });
 
 // GET /course/majors
-router.get("/majors", verifyRole(["school", "student"]), async (req, res) => {
+router.get("/majors", verifyRoleSimple(["school", "student"]), async (req, res) => {
   try {
     const snapshot = await admin.firestore().collection("majors").get();
     const majors = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
@@ -146,7 +147,7 @@ router.get("/majors", verifyRole(["school", "student"]), async (req, res) => {
 });
 
 // GET /course/soft-skills
-router.get("/soft-skills", verifyRole(["school", "student"]), async (req, res) => {
+router.get("/soft-skills", verifyRoleSimple(["school", "student"]), async (req, res) => {
   try {
     const snapshot = await admin.firestore().collection("soft-skills").get();
     const skills = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
@@ -158,7 +159,7 @@ router.get("/soft-skills", verifyRole(["school", "student"]), async (req, res) =
 });
 
 // GET /course/:courseId/details
-router.get("/details/:courseId", verifyRole(["school", "student"]), async (req, res) => {
+router.get("/details/:courseId", verifyRoleSimple(["school", "student"]), async (req, res) => {
   const { courseId } = req.params;
 
   try {

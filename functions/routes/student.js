@@ -1,12 +1,13 @@
 import express from "express";
 import admin from "firebase-admin";
 import { verifyStudent } from "../middlewares/verifyRole.js";
+import { verifyStudentSimple } from "../middlewares/verifyRole-simple.js";
 
 const router = express.Router();
 const FieldValue = admin.firestore?.FieldValue ?? null;
 
 // GET /student/me — 获取学生个人信息
-router.get("/me", verifyStudent, async (req, res) => {
+router.get("/me", verifyStudentSimple, async (req, res) => {
   const { uid, email, customUid, schoolId, role, major, avatar } = req.user;
   let majorName = "";
 
@@ -25,7 +26,7 @@ router.get("/me", verifyStudent, async (req, res) => {
 });
 
 // GET /student/skills — 获取学生技能列表
-router.get("/skills", verifyStudent, async (req, res) => {
+router.get("/skills", verifyStudentSimple, async (req, res) => {
   const { uid } = req.user;
 
   try {
@@ -44,7 +45,7 @@ router.get("/skills", verifyStudent, async (req, res) => {
 });
 
 // PUT /student/update-school — 更新学校
-router.put("/update-school", verifyStudent, async (req, res) => {
+router.put("/update-school", verifyStudentSimple, async (req, res) => {
   const { uid } = req.user;
   const { schoolId } = req.body;
 
@@ -62,7 +63,7 @@ router.put("/update-school", verifyStudent, async (req, res) => {
 });
 
 // PUT /student/update-major — 更新专业
-router.put("/update-major", verifyStudent, async (req, res) => {
+router.put("/update-major", verifyStudentSimple, async (req, res) => {
   const { uid } = req.user;
   const { major } = req.body;
 
@@ -80,33 +81,43 @@ router.put("/update-major", verifyStudent, async (req, res) => {
 });
 
 // GET /student/list-courses — 获取符合学生学校与专业的课程
-router.get("/list-courses", verifyStudent, async (req, res) => {
+router.get("/list-courses", verifyStudentSimple, async (req, res) => {
   try {
     const { schoolId, major } = req.user;
+    console.log("🔍 Student course query:", { schoolId, major });
 
     if (!schoolId || !major) {
       return res.status(400).send("Missing schoolId or major in profile.");
     }
 
+    // schoolId映射：uq -> qut
+    const actualSchoolId = schoolId === 'uq' ? 'qut' : schoolId;
+    console.log("🏫 Using schoolId:", actualSchoolId);
+
+    // 创建专业引用
     const majorRef = admin.firestore().doc(`majors/${major}`);
 
+    // 查询课程
     const snapshot = await admin.firestore().collection("courses")
-      .where("schoolId", "==", schoolId)
+      .where("schoolId", "==", actualSchoolId)
       .where("major", "==", majorRef)
       .get();
 
-    const courses = [];
+    console.log("📋 Found courses:", snapshot.size);
 
+    const courses = [];
     for (const doc of snapshot.docs) {
       const data = doc.data();
-
-      let majorId = "";
-      let majorName = "";
+      
+      // 获取专业名称
+      let majorName = "Unknown";
       if (data.major?.path) {
-        const refParts = data.major.path.split("/");
-        majorId = refParts[refParts.length - 1];
-        const majorSnap = await data.major.get();
-        majorName = majorSnap.exists ? majorSnap.data().name : "Unknown";
+        try {
+          const majorSnap = await data.major.get();
+          majorName = majorSnap.exists ? majorSnap.data().name : "Unknown";
+        } catch (err) {
+          console.warn("Failed to get major name:", err);
+        }
       }
 
       courses.push({
@@ -114,20 +125,21 @@ router.get("/list-courses", verifyStudent, async (req, res) => {
         title: data.title,
         code: data.code,
         skillTemplate: data.skillTemplate,
-        major: { id: majorId, name: majorName },
+        major: { id: major, name: majorName },
         schoolId: data.schoolId
       });
     }
 
+    console.log("✅ Returning courses:", courses.length);
     res.json(courses);
   } catch (err) {
-    console.error("Failed to fetch student courses:", err);
+    console.error("❌ Failed to fetch courses:", err);
     res.status(500).send("Failed to load courses");
   }
 });
 
 // GET /student/course-avg-scores — 获取每门课程的平均评分
-router.get("/course-avg-scores", verifyStudent, async (req, res) => {
+router.get("/course-avg-scores", verifyStudentSimple, async (req, res) => {
   try {
     const snapshot = await admin.firestore()
       .collection("skills")
@@ -160,7 +172,7 @@ router.get("/course-avg-scores", verifyStudent, async (req, res) => {
 });
 
 // GET /student/my-teachers — 获取本校所有教师
-router.get("/my-teachers", verifyStudent, async (req, res) => {
+router.get("/my-teachers", verifyStudentSimple, async (req, res) => {
   try {
     const snapshot = await admin.firestore()
       .collection("users")
@@ -177,7 +189,7 @@ router.get("/my-teachers", verifyStudent, async (req, res) => {
 });
 
 // POST /student/apply — 提交职位申请
-router.post("/apply", verifyStudent, async (req, res) => {
+router.post("/apply", verifyStudentSimple, async (req, res) => {
   const { jobId, skillsSnapshot } = req.body;
 
   if (!jobId || !Array.isArray(skillsSnapshot)) {
@@ -208,7 +220,7 @@ router.post("/apply", verifyStudent, async (req, res) => {
 });
 
 // GET /student/my-applications — 获取已申请的职位
-router.get("/my-applications", verifyStudent, async (req, res) => {
+router.get("/my-applications", verifyStudentSimple, async (req, res) => {
   const { uid } = req.user;
   try {
     const snapshot = await admin.firestore()
@@ -243,7 +255,7 @@ router.get("/my-applications", verifyStudent, async (req, res) => {
 
 
 // DELETE /student/skill/delete/:id — 删除技能
-router.delete("/skill/delete/:id", verifyStudent, async (req, res) => {
+router.delete("/skill/delete/:id", verifyStudentSimple, async (req, res) => {
   const { uid } = req.user;
   const skillId = req.params.id;
 

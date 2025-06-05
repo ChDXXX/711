@@ -81,17 +81,22 @@ const EditJobPage = () => {
         const studentMap = new Map();
         
         // Load matched students
-// Load matched students across all skills and merge results
+        console.log("🔍 开始查询学生技能匹配...");
+        console.log("📋 技能列表:", job.skills);
+        
         for (const skill of job.skills || []) {
           try {
+            console.log(`🔍 查询技能: ${skill}`);
             const students = await findStudentsBySkill(skill, token, job.softSkills || []);
-            console.log(students)
+            console.log(`✅ 查询到 ${students.length} 名匹配学生`);
 
             for (const student of students) {
               if (!studentMap.has(student.id)) {
+                console.log(`➕ 添加新学生: ${student.id}`);
                 studentMap.set(student.id, student);
               } else {
                 // Merge skill titles and accumulate soft skill match count
+                console.log(`🔄 合并已有学生技能: ${student.id}`);
                 const existing = studentMap.get(student.id);
                 existing.skills = Array.from(new Set([
                   ...(existing.skills || []),
@@ -105,7 +110,7 @@ const EditJobPage = () => {
               }
             }
           } catch (err) {
-            console.error(`Error finding students for skill "${skill}":`, err);
+            console.error(`❌ 查询技能 "${skill}" 失败:`, err);
           }
         }
 
@@ -113,6 +118,16 @@ const EditJobPage = () => {
         const sorted = [...studentMap.values()].sort(
           (a, b) => (b.softSkillMatchCount || 0) - (a.softSkillMatchCount || 0)
         );
+        
+        console.log(`📊 总共找到 ${sorted.length} 名匹配学生`);
+        if (sorted.length > 0) {
+          console.log(`📋 第一名学生示例:`, JSON.stringify({
+            id: sorted[0].id,
+            name: sorted[0].name,
+            skills: sorted[0].skills
+          }));
+        }
+        
         setMatchedStudents(sorted);
       } catch (err) {
         console.error('Failed to load job', err);
@@ -143,7 +158,17 @@ const EditJobPage = () => {
 
   const handleSubmit = async (values) => {
     try {
-      await updateJob(jobId, values, token);
+      // 只提取必要的字段，避免不兼容字段
+      const jobData = {
+        title: values.title,
+        description: values.description,
+        price: values.price,
+        location: values.location,
+        skills: values.skills || []
+      };
+      
+      console.log("📤 提交Job更新数据:", jobData);
+      await updateJob(jobId, jobData, token);
       alert('Job updated successfully');
       navigate('/employer/jobs-list', { state: { reload: true } });
     } catch (err) {
@@ -247,14 +272,22 @@ const EditJobPage = () => {
 
       {matchedStudents.length > 0 && (
         <Box mt="xl">
-          <Title order={4}>Matching Students</Title>
+          <Title order={4}>Matching Students ({matchedStudents.length})</Title>
           <Group mt="md" spacing="md">
             {matchedStudents.map((student) => {
-              const assignment = (form.values.assignments || []).find(
+              // 旧方法：查找assignments中的状态
+              const oldAssignment = (form.values.assignments || []).find(
                 (a) => a.studentId === student.id
               );
-
-              const status = assignment?.status || null;
+              
+              // 新方法：直接检查job的studentId和status
+              const isAssigned = job.studentId === student.id;
+              const jobStatus = isAssigned ? job.status : null;
+              
+              // 使用正确的状态值
+              const status = jobStatus || oldAssignment?.status || null;
+              
+              console.log(`🔍 学生${student.id}状态: assigned=${isAssigned}, status=${status}`);
 
               const showVerifyButton = status === 'completed';
 
@@ -262,7 +295,7 @@ const EditJobPage = () => {
               const finalStatuses = ["assigned", "accepted", "rejected", "completed", "verified"];
               
               // Determine whether to show the assign button
-              const showAssignButton =  (!status || !finalStatuses.includes(status));
+              const showAssignButton = (!status || !finalStatuses.includes(status));
 
               return (
                 <StudentCard
@@ -289,8 +322,8 @@ const EditJobPage = () => {
                   showVerifyButton={showVerifyButton}
                   verifyJob={async (studentId) => {
                     try {
-                      await verifyJobCompletion(jobId, studentId, token);
-                      alert(`Job assigned to ${student.name || student.email} verified successfully`);
+                      await verifyJobCompletion(jobId, token);
+                      alert(`Job verified successfully`);
                       navigate('/employer/jobs-list', { state: { reload: true } });
                     } catch (err) {
                       console.error('Verification failed:', err);

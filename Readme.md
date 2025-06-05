@@ -1,5 +1,3 @@
-# 711
-
 IFN711
 global installation
 plz use node.js v20, which is the only version can export ipfs.
@@ -22,9 +20,7 @@ smart-contracts:
 cd smart-contracts
 #1 npm install --save-dev hardhat solc
 #2 npm install @openzeppelin/contracts
-#3 npx hardhat compile
-#4 ganache --port 8550 --db ./ganache-db --chain.chainId 1337 --mnemonic "inner increase scissors eight brave vapor leisure perfect robot light join initial" (#4 and #5 should be run at the same time, keep this running)
-#5 npx hardhat run scripts/deploy.js --network ganache (and open a new terminal to run this line)
+
 
 
 how to run：
@@ -34,11 +30,8 @@ how to run：
 #2. (1) back to ddigital-skill-wallet run code: firebase emulators:start --only functions
     (2) cd to frontend run: npm run dev
     (3) cd to smart-contracts run:npx hardhat compile
-    (4) ganache --port 8550 --db ./ganache-db --chain.chainId 1337 --mnemonic "inner increase scissors eight brave vapor leisure perfect robot light join initial"
-    (5) npx hardhat run scripts/deploy.js --network ganache (and open a new terminal to run this line)
-
-
-
-
-
+    (4) npx hardhat run scripts/deploy.js --network ganache (and open a new terminal to run this line)
+    (5) select and copy a Private Keys address from ganache terminal to Frontend/.env into VITE_CONTRACT_ADDRESS=
+    (6) copy Digital Wallet address from deployment terminal to Frontend/.env into VITE_PRIVATE_KEY=
+    (7) cd to smart-contracts run: ganache --port 8550 --db ./ganache-db --chain.chainId 1337 --mnemonic "inner increase scissors eight brave vapor leisure perfect robot light join initial"
 
