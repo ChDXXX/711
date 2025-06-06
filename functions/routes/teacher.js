@@ -1,12 +1,13 @@
 import express from "express";
 import admin from "firebase-admin";
 import { verifyTeacher } from "../middlewares/verifyRole.js";
+import { verifyRoleSimple } from "../middlewares/verifyRole-simple.js";
 
 const router = express.Router();
 const FieldValue = admin.firestore.FieldValue;
 
 // 获取本校所有学生
-router.get("/students", verifyTeacher, async (req, res) => {
+router.get("/students", verifyRoleSimple(["teacher", "school"]), async (req, res) => {
   try {
     const snapshot = await admin.firestore()
       .collection("users")
@@ -23,7 +24,7 @@ router.get("/students", verifyTeacher, async (req, res) => {
 });
 
 // 获取某个学生的技能
-router.get("/student/:id/skills", verifyTeacher, async (req, res) => {
+router.get("/student/:id/skills", verifyRoleSimple(["teacher", "school"]), async (req, res) => {
   const studentId = req.params.id;
 
   try {
@@ -50,7 +51,7 @@ router.get("/student/:id/skills", verifyTeacher, async (req, res) => {
 });
 
 // 获取本校教师
-router.get("/teachers", verifyTeacher, async (req, res) => {
+router.get("/teachers", verifyRoleSimple(["teacher", "school"]), async (req, res) => {
   try {
     const snapshot = await admin.firestore()
       .collection("users")
@@ -67,7 +68,7 @@ router.get("/teachers", verifyTeacher, async (req, res) => {
 });
 
 // 获取本校课程
-router.get("/courses", verifyTeacher, async (req, res) => {
+router.get("/courses", verifyRoleSimple(["teacher", "school"]), async (req, res) => {
   try {
     const snapshot = await admin.firestore()
       .collection("courses")
@@ -83,7 +84,7 @@ router.get("/courses", verifyTeacher, async (req, res) => {
 });
 
 // GET /course/:courseId/students
-router.get("/course/:courseId/students", verifyTeacher, async (req, res) => {
+router.get("/course/:courseId/students", verifyRoleSimple(["teacher", "school"]), async (req, res) => {
   const courseId = req.params.courseId;
 
   try {
@@ -121,7 +122,7 @@ router.get("/course/:courseId/students", verifyTeacher, async (req, res) => {
 });
 
 // 获取课程详情（包含创建教师信息）
-router.get("/course/:courseId/details", verifyTeacher, async (req, res) => {
+router.get("/course/:courseId/details", verifyRoleSimple(["teacher", "school"]), async (req, res) => {
   const courseId = req.params.courseId;
 
   try {
@@ -150,7 +151,7 @@ router.get("/course/:courseId/details", verifyTeacher, async (req, res) => {
 });
 
 // 获取当前教师创建的课程
-router.get("/my-courses", verifyTeacher, async (req, res) => {
+router.get("/my-courses", verifyRoleSimple(["teacher", "school"]), async (req, res) => {
   try {
     const snapshot = await admin.firestore()
       .collection("courses")
@@ -166,7 +167,7 @@ router.get("/my-courses", verifyTeacher, async (req, res) => {
 });
 
 // 获取当前学校的待审核技能
-router.get("/pending-skills", verifyTeacher, async (req, res) => {
+router.get("/pending-skills", verifyRoleSimple(["teacher", "school"]), async (req, res) => {
   try {
     const snapshot = await admin.firestore()
       .collection("skills")
@@ -221,86 +222,68 @@ router.get("/:schoolId/students", async (req, res) => {
   }
 });
 
-// PUT /skill/review/:id — 教师审核技能（统一版本）
-router.put("/review/:id", verifyTeacher, async (req, res) => {
-  const { uid } = req.user;
-  const skillId = req.params.id;
-  const { verified, hardSkillScores, softSkillScores, note } = req.body;
-
-  // 检查审核状态是否合法
-  if (!["approved", "rejected"].includes(verified)) {
-    return res.status(400).send("Invalid verified status.");
-  }
-
-  try {
-    const skillRef = admin.firestore().doc(`skills/${skillId}`);
-    const skillDoc = await skillRef.get();
-    if (!skillDoc.exists) return res.status(404).send("Skill not found.");
-
-    const updateData = {
-      verified,
-      note: note || "",
-      reviewedBy: uid,
-      reviewedAt: FieldValue.serverTimestamp(),
-    };
-
-    if (verified === "approved") {
-      if (
-        typeof hardSkillScores !== "object" ||
-        typeof softSkillScores !== "object"
-      ) {
-        return res.status(400).send("Missing or invalid rubric score structure");
-      }
-
-      updateData.hardSkillScores = hardSkillScores || {};
-      updateData.softSkillScores = softSkillScores || {};
-    } else {
-      updateData.hardSkillScores = null;
-      updateData.softSkillScores = null;
-    }
-
-    await skillRef.update(updateData);
-    res.send("Skill review submitted.");
-  } catch (err) {
-    console.error("Skill review failed:", err);
-    res.status(500).send("Failed to review skill.");
-  }
-});
-
 // PUT /skill/review/:id — 教师审核技能
-router.put("/review/:id", verifyTeacher, async (req, res) => {
+router.put("/review/:id", verifyRoleSimple(["teacher", "school"]), async (req, res) => {
+  // console.log("🔍 Review request received:", {
+  //   skillId: req.params.id,
+  //   userId: req.user?.uid,
+  //   userRole: req.user?.role,
+  //   body: req.body
+  // });
+
   const { uid } = req.user;
   const skillId = req.params.id;
-  const { verified, hardSkillScores, softSkillScores, note } = req.body;
+  const { verified, hardSkillScores, softSkillScores, note, reviewedAt: frontendReviewedAt, hardSkillNames } = req.body;
 
   if (!['approved', 'rejected'].includes(verified)) {
+    // console.error("❌ Invalid verified status:", verified);
     return res.status(400).send("Invalid verified status.");
   }
 
   try {
     const skillRef = admin.firestore().doc(`skills/${skillId}`);
     const skillDoc = await skillRef.get();
-    if (!skillDoc.exists) return res.status(404).send("Skill not found.");
+    if (!skillDoc.exists) {
+      // console.error("❌ Skill not found:", skillId);
+      return res.status(404).send("Skill not found.");
+    }
+
+    // console.log("📋 Skill found, updating...");
 
     const updateData = {
       verified,
       note: note || "",
       reviewedBy: uid,
-      reviewedAt: FieldValue.serverTimestamp(),
     };
+
+    // 明确处理 reviewedAt
+    if (typeof frontendReviewedAt === 'number' && frontendReviewedAt > 0) {
+      updateData.reviewedAt = frontendReviewedAt; // 使用前端传递的秒级时间戳
+      console.log(`Backend: Using frontendReviewedAt: ${frontendReviewedAt} (seconds) for Firestore for skill ID: ${skillId}.`);
+    } else {
+      // 理论上前端总是会传递有效的 reviewedAtForUpload（秒级时间戳）
+      // 但作为非常极端情况下的回退，或者如果将来逻辑改变，这里可以记录一个警告并使用服务器时间
+      console.warn(`Backend: frontendReviewedAt was not a valid positive number (received: ${frontendReviewedAt}). Falling back to serverTimestamp for skill ID: ${skillId}. THIS SHOULD NOT HAPPEN NORMALLY.`);
+      updateData.reviewedAt = FieldValue.serverTimestamp();
+    }
 
     if (verified === "approved") {
       updateData.hardSkillScores = hardSkillScores || {};
       updateData.softSkillScores = softSkillScores || {};
+      updateData.hardSkillNames = hardSkillNames || [];
+      // console.log("✅ Approved with scores and names:", { hardSkillScores, softSkillScores, hardSkillNames });
     } else {
       updateData.hardSkillScores = null;
       updateData.softSkillScores = null;
+      updateData.hardSkillNames = null;
+      // console.log("❌ Rejected");
     }
 
     await skillRef.update(updateData);
+    // console.log("✅ Review submitted successfully");
     res.send("Review submitted.");
   } catch (err) {
-    console.error("Skill review failed:", err);
+    // console.error("❌ Skill review failed:", err);
     res.status(500).send("Failed to review skill.");
   }
 });

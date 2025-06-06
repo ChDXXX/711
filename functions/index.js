@@ -3,7 +3,16 @@ import admin from "firebase-admin";
 import app from "./app.js";
 import { syncUserDocument } from "./scripts/syncUserOnLogin.js";
 
+// 初始化Firebase Admin SDK
 admin.initializeApp();
+
+// 添加Firestore设置
+const db = admin.firestore();
+db.settings({
+  ignoreUndefinedProperties: true,
+});
+
+console.log("🔥 Firebase Admin initialized for project:", admin.app().options.projectId);
 
 export const api = functions.https.onRequest(app);
 

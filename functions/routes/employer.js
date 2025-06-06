@@ -1,5 +1,6 @@
 import express from "express";
 import admin from "firebase-admin";
+import { verifyEmployerSimple } from "../middlewares/verifyRole-simple.js";
 
 const router = express.Router();
 
@@ -28,30 +29,8 @@ async function verifyEmployer(req, res, next) {
   }
 }
 
-// GET /employer/soft-skills
-router.get("/soft-skills", verifyEmployer, async (req, res) => {
-  const { role } = req.user;
-
-  // Only allow employers to access this
-  if (role !== "employer") return res.status(403).send("Only employers can view soft skills");
-
-  try {
-    const snapshot = await admin.firestore().collection("soft-skills").get();
-    
-    const skills = snapshot.docs.map(doc => ({
-      id: doc.id,
-      name: doc.data().name,
-    }));
-
-    res.status(200).json(skills);
-  } catch (error) {
-    console.error("Error fetching soft skills:", error.message);
-    res.status(500).send("Failed to retrieve soft skills");
-  }
-});
-
 // GET /employer/student/:id
-router.get("/student/:id", verifyEmployer, async (req, res) => {
+router.get("/student/:id", verifyEmployerSimple, async (req, res) => {
   const studentId = req.params.id;
 
   try {
@@ -72,7 +51,7 @@ router.get("/student/:id", verifyEmployer, async (req, res) => {
 });
 
 // GET /employer/student/:id/skills
-router.get("/student/:id/skills", verifyEmployer, async (req, res) => {
+router.get("/student/:id/skills", verifyEmployerSimple, async (req, res) => {
   const studentId = req.params.id;
 
   try {
@@ -93,12 +72,49 @@ router.get("/student/:id/skills", verifyEmployer, async (req, res) => {
 // GET /employer/schools
 router.get("/schools", async (req, res) => {
   try {
-    const snapshot = await admin.firestore().collection("schools").get();
-    const schools = snapshot.docs.map(doc => ({
-      code: doc.data().code,
-      name: doc.data().name,
-    }));
-    res.json(schools);
+    // 尝试从Firestore获取，如果失败则返回硬编码数据
+    try {
+      const snapshot = await admin.firestore().collection("schools").get();
+      if (!snapshot.empty) {
+        const schools = snapshot.docs.map(doc => ({
+          code: doc.data().code,
+          name: doc.data().name,
+        }));
+        return res.json(schools);
+      }
+    } catch (firestoreError) {
+      console.log("Firestore not available, using hardcoded school data");
+    }
+    
+    // 硬编码的学校数据作为备用
+    const hardcodedSchools = [
+      {
+        code: "QUT",
+        name: "Queensland University of Technology"
+      },
+      {
+        code: "UQ", 
+        name: "University of Queensland"
+      },
+      {
+        code: "GU",
+        name: "Griffith University"
+      },
+      {
+        code: "USQ",
+        name: "University of Southern Queensland"
+      },
+      {
+        code: "JCU",
+        name: "James Cook University"
+      },
+      {
+        code: "CQU",
+        name: "Central Queensland University"
+      }
+    ];
+    
+    res.json(hardcodedSchools);
   } catch (err) {
     console.error("Error fetching schools:", err);
     res.status(500).send("Failed to fetch school list");
@@ -106,7 +122,7 @@ router.get("/schools", async (req, res) => {
 });
 
 // GET /employer/school/:schoolId/students
-router.get("/school/:schoolId/students", verifyEmployer, async (req, res) => {
+router.get("/school/:schoolId/students", verifyEmployerSimple, async (req, res) => {
   const { schoolId } = req.params;
 
   try {
@@ -125,225 +141,87 @@ router.get("/school/:schoolId/students", verifyEmployer, async (req, res) => {
 });
 
 // GET /employer/students/skills/:skill
-router.get("/students/skills/:skill", verifyEmployer, async (req, res) => {
+router.get("/students/skills/:skill", verifyEmployerSimple, async (req, res) => {
   const { skill } = req.params;
-  const jobSoftSkills = (req.query.softSkills || "").split(",").filter(Boolean);
+  const { softSkills } = req.query; // 获取软技能参数
+  const { uid } = req.user;
 
   try {
-    // Step 1: Load mapping collections
-    const [schoolsSnap, majorsSnap, softSkillsSnap] = await Promise.all([
-      admin.firestore().collection("schools").get(),
-      admin.firestore().collection("majors").get(),
-      admin.firestore().collection("soft-skills").get(),
-    ]);
-
-    const schoolMap = {};
-    schoolsSnap.docs.forEach(doc => {
-      const data = doc.data();
-      if (data.code && data.name) {
-        schoolMap[data.code] = data.name;
-      }
-    });
-
-    const majorMap = {};
-    majorsSnap.docs.forEach(doc => {
-      majorMap[doc.id] = doc.data().name;
-    });
-
-    const softSkillMap = {};
-    softSkillsSnap.docs.forEach(doc => {
-      softSkillMap[doc.id] = doc.data().name;
-    });
-
-    // Step 2: Load all skills
+    console.log(`🔍 Backend: 雇主(${uid})查询技能: ${skill}, 软技能: ${softSkills || '无'}`);
+    
+    // Step 1: Get all skills
+    console.log(`📚 Backend: 正在获取技能集合...`);
     const skillSnapshot = await admin.firestore().collection("skills").get();
-    const allSkills = skillSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    console.log(`📊 Backend: 找到${skillSnapshot.docs.length}个技能记录`);
 
-    // Step 3: Filter only students who match the search term
-    const matchedStudentIds = new Set();
-    for (const s of allSkills) {
-      if ((s.title || "").toLowerCase().includes(skill.toLowerCase()) && s.ownerId) {
-        matchedStudentIds.add(s.ownerId);
-      }
-    }
+    // Step 2: Filter those matching the search term
+    console.log(`🔍 Backend: 正在过滤匹配的技能...`);
+    const matchedSkills = skillSnapshot.docs.filter(doc =>
+      doc.data().title.toLowerCase().includes(skill.toLowerCase())
+    );
+    console.log(`✅ Backend: 找到${matchedSkills.length}个匹配的技能`);
 
-    // Step 4: Group all skills by matched students
-    const studentSkillsMap = new Map();
-    for (const s of allSkills) {
-      const studentId = s.ownerId;
-      if (!studentId || !matchedStudentIds.has(studentId)) continue;
+    // Step 3: Get unique ownerIds (student UIDs)
+    const ownerIds = [...new Set(matchedSkills.map(doc => doc.data().ownerId))];
+    console.log(`👥 Backend: 找到${ownerIds.length}个拥有匹配技能的学生ID`);
 
-      if (!studentSkillsMap.has(studentId)) {
-        studentSkillsMap.set(studentId, {
-          skills: [],
-          softSkillMatchCount: 0
+    // Step 4: Build a map of studentId -> skill titles
+    const studentSkillsMap = {};
+    matchedSkills.forEach(doc => {
+      const { ownerId, title } = doc.data();
+      if (!studentSkillsMap[ownerId]) studentSkillsMap[ownerId] = [];
+      studentSkillsMap[ownerId].push(title);
+    });
+
+    // Step 5: Fetch student user documents
+    console.log(`🔄 Backend: 正在获取学生详细信息...`);
+    const students = [];
+    for (const id of ownerIds) {
+      const userDoc = await admin.firestore().collection("users").doc(id).get();
+      if (userDoc.exists && userDoc.data().role === 'student') {
+        const userData = userDoc.data();
+        
+        // 获取学校名称
+        let schoolName = null;
+        if (userData.schoolId) {
+          const schoolSnapshot = await admin.firestore()
+            .collection("schools")
+            .where("code", "==", userData.schoolId)
+            .limit(1)
+            .get();
+            
+          if (!schoolSnapshot.empty) {
+            schoolName = schoolSnapshot.docs[0].data().name;
+          }
+        }
+        
+        students.push({
+          id: userDoc.id,
+          ...userData,
+          schoolName,
+          skills: studentSkillsMap[userDoc.id] || [] // attach actual skill titles
         });
       }
-
-      const softTitles = (s.softSkills || []).map(id => softSkillMap[id] || id);
-      const softMatchCount = (s.softSkills || []).filter(id => jobSoftSkills.includes(String(id))).length;
-
-      studentSkillsMap.get(studentId).skills.push({
-        title: s.title,
-        level: s.level || null,
-        softSkillTitles: softTitles
-      });
-
-      studentSkillsMap.get(studentId).softSkillMatchCount += softMatchCount;
     }
-
-    // Step 5: Fetch student info
-    const students = [];
-    for (const [studentId, skillData] of studentSkillsMap.entries()) {
-      const userDoc = await admin.firestore().collection("users").doc(studentId).get();
-      if (!userDoc.exists || userDoc.data().role !== "student") continue;
-
-      const user = userDoc.data();
-
-      students.push({
-        id: studentId,
-        studentId, // to be consistent
-        name: user.name,
-        email: user.email,
-        customUid: user.customUid,
-        schoolId: user.schoolId,
-        schoolName: schoolMap[user.schoolId] || user.schoolId,
-        major: user.major,
-        majorName: majorMap[user.major] || user.major,
-        skills: skillData.skills,
-        softSkillMatchCount: skillData.softSkillMatchCount,
-      });
+    
+    console.log(`✅ Backend: 找到${students.length}名符合条件的学生`);
+    
+    // 返回前打印第一个学生的信息（如果有）作为调试
+    if (students.length > 0) {
+      const sample = {...students[0]};
+      delete sample.email; // 不打印敏感信息
+      console.log(`📋 Backend: 样本学生数据:`, JSON.stringify(sample));
     }
-
-    // Step 6: Sort
-    students.sort((a, b) => b.softSkillMatchCount - a.softSkillMatchCount);
 
     res.json(students);
   } catch (error) {
-    console.error("Error searching students by skill:", error.message);
+    console.error("❌ Error searching students by skill:", error.message);
     res.status(500).send("Failed to search students");
   }
 });
-
-
-
-
-
-
-// GET /employer/search-students?techSkills=React,Node.js&softSkills=3,4,5
-router.get("/search-students", verifyEmployer, async (req, res) => {
-  const techSkillsFilter = (req.query.techSkills || "").split(",").filter(Boolean); // e.g. ["React", "Node.js"]
-  const softSkillsFilter = (req.query.softSkills || "").split(",").filter(Boolean); // e.g. ["3", "4"]
-
-  console.log("techSkillsFilter:", techSkillsFilter);
-  console.log("softSkillsFilter:", softSkillsFilter);
-
-  try {
-    // Step 1: Load all schools, majors, and soft skill names
-    const [schoolsSnap, majorsSnap, softSkillsSnap] = await Promise.all([
-      admin.firestore().collection("schools").get(),
-      admin.firestore().collection("majors").get(),
-      admin.firestore().collection("soft-skills").get(),
-    ]);
-
-    const schoolMap = {};
-    schoolsSnap.docs.forEach(doc => {
-      const data = doc.data();
-      if (data.code && data.name) {
-        schoolMap[data.code] = data.name;
-      }
-    });
-
-    const majorMap = {};
-    majorsSnap.docs.forEach(doc => {
-      const data = doc.data();
-      majorMap[doc.id] = data.name;
-    });
-
-    const softSkillMap = {};
-    softSkillsSnap.docs.forEach(doc => {
-      softSkillMap[doc.id] = doc.data().name;
-    });
-
-    // Step 2: Load all skills
-    const skillSnapshot = await admin.firestore().collection("skills").get();
-    const allSkills = skillSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    // Step 3: Identify matched students
-    const matchedStudentIds = new Set();
-    for (const skill of allSkills) {
-      const matchesTech =
-        techSkillsFilter.length === 0 ||
-        techSkillsFilter.some(filter =>
-          (skill.title || "").toLowerCase().includes(filter.toLowerCase())
-        );
-
-      const matchesSoft =
-        softSkillsFilter.length === 0 ||
-        (skill.softSkills || []).some(s => softSkillsFilter.includes(String(s)));
-
-      if (matchesTech && matchesSoft && skill.ownerId) {
-        matchedStudentIds.add(skill.ownerId);
-      }
-    }
-
-    if (matchedStudentIds.size === 0) {
-      console.log("No students matched the filters");
-      return res.json([]);
-    }
-
-    // Step 4: Group all skills by student (only for matched students)
-    const studentSkillMap = new Map();
-    for (const skill of allSkills) {
-      const studentId = skill.ownerId;
-      if (!studentId || !matchedStudentIds.has(studentId)) continue;
-
-      if (!studentSkillMap.has(studentId)) {
-        studentSkillMap.set(studentId, []);
-      }
-
-      studentSkillMap.get(studentId).push({
-        ...skill,
-        softSkillTitles: (skill.softSkills || []).map(id => softSkillMap[id] || id)
-      });
-    }
-
-    // Step 5: Load student info and build response
-    const results = [];
-
-    for (const [studentId, skills] of studentSkillMap.entries()) {
-      const studentDoc = await admin.firestore().doc(`users/${studentId}`).get();
-      if (!studentDoc.exists) continue;
-
-      const student = studentDoc.data();
-      if (student.role !== "student") continue;
-
-      results.push({
-        studentId,
-        name: student.name,
-        email: student.email,
-        customUid: student.customUid,
-        schoolId: student.schoolId,
-        schoolName: schoolMap[student.schoolId] || student.schoolId,
-        major: student.major,
-        majorName: majorMap[student.major] || student.major,
-        skills,
-      });
-    }
-
-    res.json(results);
-  } catch (error) {
-    console.error("Error searching students:", error.message);
-    res.status(500).send("Failed to search students");
-  }
-});
-
-
-
-
 
 // PATCH /employer/applications/:applicationId — 更新状态（通过 / 拒绝 / 面试）
-router.patch("/applications/:applicationId", verifyEmployer, async (req, res) => {
+router.patch("/applications/:applicationId", verifyEmployerSimple, async (req, res) => {
   const { applicationId } = req.params;
   const { status, note } = req.body;
 
@@ -383,7 +261,7 @@ router.patch("/applications/:applicationId", verifyEmployer, async (req, res) =>
 
 
 // GET /employer/recent-applications
-router.get("/recent-applications", verifyEmployer, async (req, res) => {
+router.get("/recent-applications", verifyEmployerSimple, async (req, res) => {
   try {
     const snapshot = await admin.firestore()
       .collection("applications")
@@ -417,7 +295,7 @@ router.get("/recent-applications", verifyEmployer, async (req, res) => {
 });
 
 // GET /employer/application-summary
-router.get("/application-summary", verifyEmployer, async (req, res) => {
+router.get("/application-summary", verifyEmployerSimple, async (req, res) => {
   try {
     const snapshot = await admin.firestore()
       .collection("applications")
@@ -443,7 +321,7 @@ router.get("/application-summary", verifyEmployer, async (req, res) => {
 });
 
 // GET /employer/approved-students
-router.get("/approved-students", verifyEmployer, async (req, res) => {
+router.get("/approved-students", verifyEmployerSimple, async (req, res) => {
   try {
     const snapshot = await admin.firestore()
       .collection("skills")
@@ -496,5 +374,195 @@ router.get("/approved-students", verifyEmployer, async (req, res) => {
   }
 });
 
+// GET /employer/search-students
+router.get("/search-students", verifyEmployerSimple, async (req, res) => {
+  const { techSkills, softSkills } = req.query;
+  const { uid } = req.user;
+  
+  try {
+    console.log(`🔍 Backend: 雇主(${uid})搜索学生: techSkills=${techSkills || '无'}, softSkills=${softSkills || '无'}`);
+    
+    // 将技能字符串转换为数组
+    const techSkillsArray = techSkills ? techSkills.split(',').map(s => s.trim().toLowerCase()) : [];
+    const softSkillsArray = softSkills ? softSkills.split(',') : [];
+    
+    console.log(`📚 Backend: 技术技能: [${techSkillsArray.join(', ')}], 软技能: [${softSkillsArray.join(', ')}]`);
+    
+    // 如果没有指定技能，返回所有学生
+    if (techSkillsArray.length === 0 && softSkillsArray.length === 0) {
+      console.log(`🔍 Backend: 没有指定技能，返回所有学生`);
+      const snapshot = await admin.firestore()
+        .collection("users")
+        .where("role", "==", "student")
+        .limit(50) // 限制数量避免返回太多
+        .get();
+      
+      const students = await Promise.all(snapshot.docs.map(async (doc) => {
+        const userData = doc.data();
+        
+        // 获取学生技能
+        const skillsSnapshot = await admin.firestore()
+          .collection("skills")
+          .where("ownerId", "==", doc.id)
+          .get();
+        
+        const skills = skillsSnapshot.docs.map(skillDoc => ({
+          id: skillDoc.id,
+          ...skillDoc.data()
+        }));
+        
+        // 获取学校名称
+        let schoolName = null;
+        if (userData.schoolId) {
+          const schoolSnapshot = await admin.firestore()
+            .collection("schools")
+            .where("code", "==", userData.schoolId)
+            .limit(1)
+            .get();
+            
+          if (!schoolSnapshot.empty) {
+            schoolName = schoolSnapshot.docs[0].data().name;
+          }
+        }
+        
+        return {
+          id: doc.id,
+          ...userData,
+          schoolName,
+          skills: skills.map(s => s.title || ''),
+          skillObjects: skills
+        };
+      }));
+      
+      console.log(`✅ Backend: 返回${students.length}名学生`);
+      return res.json(students);
+    }
+    
+    // 如果指定了技能，查找符合条件的学生
+    console.log(`🔍 Backend: 查询技能匹配的学生`);
+    const skillSnapshot = await admin.firestore().collection("skills").get();
+    
+    // 过滤匹配技术技能的技能记录
+    const matchedSkills = skillSnapshot.docs.filter(doc => {
+      const skillData = doc.data();
+      const skillTitle = (skillData.title || '').toLowerCase();
+      
+      // 检查是否匹配任何一个技术技能
+      return techSkillsArray.some(tech => skillTitle.includes(tech));
+    });
+    
+    console.log(`📊 Backend: 找到${matchedSkills.length}个匹配技能记录`);
+    
+    // 提取学生ID并去重
+    const studentIds = [...new Set(matchedSkills.map(doc => doc.data().ownerId))];
+    console.log(`👥 Backend: 找到${studentIds.length}个独立学生ID`);
+    
+    // 构建学生ID到技能的映射
+    const studentSkillsMap = {};
+    matchedSkills.forEach(doc => {
+      const { ownerId, title } = doc.data();
+      if (!studentSkillsMap[ownerId]) studentSkillsMap[ownerId] = [];
+      if (title) studentSkillsMap[ownerId].push(title);
+    });
+    
+    // 获取学生详细信息
+    const students = [];
+    for (const id of studentIds) {
+      const userDoc = await admin.firestore().collection("users").doc(id).get();
+      if (userDoc.exists && userDoc.data().role === 'student') {
+        const userData = userDoc.data();
+        
+        // 获取学校名称
+        let schoolName = null;
+        if (userData.schoolId) {
+          const schoolSnapshot = await admin.firestore()
+            .collection("schools")
+            .where("code", "==", userData.schoolId)
+            .limit(1)
+            .get();
+            
+          if (!schoolSnapshot.empty) {
+            schoolName = schoolSnapshot.docs[0].data().name;
+          }
+        }
+        
+        // 获取所有技能对象
+        const skillsSnapshot = await admin.firestore()
+          .collection("skills")
+          .where("ownerId", "==", id)
+          .get();
+        
+        const skillObjects = skillsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        students.push({
+          id: userDoc.id,
+          ...userData,
+          schoolName,
+          skills: studentSkillsMap[userDoc.id] || [],
+          skillObjects
+        });
+      }
+    }
+    
+    console.log(`✅ Backend: return ${students.length} eligible students`);
+    if (students.length > 0) {
+      const sample = {...students[0]};
+      delete sample.email; // 不打印敏感信息
+      console.log(`📋 Backend: Sample student data:`, JSON.stringify(sample));
+    }
+    
+    res.json(students);
+  } catch (error) {
+    console.error(`❌ Backend: Search for student failed:`, error.message);
+    res.status(500).send("Failed to search students");
+  }
+});
+
+// GET /employer/soft-skills
+router.get("/soft-skills", verifyEmployerSimple, async (req, res) => {
+  const { uid } = req.user;
+  
+  try {
+    console.log(`🔍 Backend: employer(${uid})get a list of soft skills`);
+    
+    // 首先尝试从Firestore获取软技能
+    try {
+      const snapshot = await admin.firestore().collection("softSkills").get();
+      
+      if (!snapshot.empty) {
+        const softSkills = snapshot.docs.map(doc => ({
+          id: doc.id,
+          name: doc.data().name
+        }));
+        
+        console.log(`✅ Backend: from the database${softSkills.length}soft skills found`);
+        return res.json(softSkills);
+      }
+    } catch (dbError) {
+      console.log("📝 Backend: Database query failed, using hardcoded fallback data", dbError.message);
+    }
+    
+    // 如果数据库没有数据，则返回硬编码的软技能列表
+    const defaultSoftSkills = [
+  { id: "communication", name: "Communication" },
+  { id: "teamwork", name: "Teamwork" },
+  { id: "problemSolving", name: "Problem-Solving Ability" },
+  { id: "creativity", name: "Creativity" },
+  { id: "leadership", name: "Leadership" },
+  { id: "timeManagement", name: "Time Management" },
+  { id: "adaptability", name: "Adaptability" },
+  { id: "criticalThinking", name: "Critical Thinking" }
+];
+    
+    console.log(`✅ Backend: return${defaultSoftSkills.length}default soft skills`);
+    res.json(defaultSoftSkills);
+  } catch (error) {
+    console.error(`❌ Backend: acquire soft skills failed:`, error.message);
+    res.status(500).send("Failed to fetch soft skills");
+  }
+});
 
 export default router;
