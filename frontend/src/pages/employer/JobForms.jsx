@@ -3,9 +3,10 @@ import {
   Box, TextInput, Textarea, Button, Table, Text, Group, Center,
   Loader, Modal, Pagination, MultiSelect, NumberInput
 } from "@mantine/core";
+import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
-import axios from "../../utils/axiosInstance";
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const PAGE_SIZE = 5;
 
 export default function JobForms() {
@@ -33,16 +34,11 @@ export default function JobForms() {
   const fetchJobs = async () => {
     setLoading(true);
     const token = await user.getIdToken();
-    try {
-      const res = await axios.get(`/job`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setJobs(res.data);
-    } catch (error) {
-      console.error("Error fetching jobs:", error);
-    } finally {
-      setLoading(false);
-    }
+    const res = await axios.get(`${BASE_URL}/job/list?uid=${user.uid}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setJobs(res.data);
+    setLoading(false);
   };
 
   const handleSubmit = async () => {
@@ -51,6 +47,7 @@ export default function JobForms() {
     const token = await user.getIdToken();
 
     const payload = {
+      uid: user.uid,
       title,
       description,
       price,
@@ -61,11 +58,11 @@ export default function JobForms() {
 
     try {
       if (editingJob) {
-        await axios.put(`/job/${editingJob}`, { ...payload }, {
+        await axios.put(`${BASE_URL}/job/update/${editingJob}`, { ...payload }, {
           headers: { Authorization: `Bearer ${token}` },
         });
       } else {
-        await axios.post(`/job`, payload, {
+        await axios.post(`${BASE_URL}/job/create`, payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
@@ -106,7 +103,7 @@ export default function JobForms() {
 
   const handleDelete = async () => {
     const token = await user.getIdToken();
-    await axios.delete(`/job/${confirmDeleteId}`, {
+    await axios.delete(`${BASE_URL}/job/delete/${confirmDeleteId}?uid=${user.uid}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     setShowDeleteModal(false);

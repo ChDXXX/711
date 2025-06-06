@@ -1,21 +1,23 @@
 import axios from "../utils/axiosInstance";
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export async function getStudentInfo(token, studentId) {
-  const res = await axios.get(`/employer/student/${studentId}`, {
+  const res = await axios.get(`${BASE_URL}/employer/student/${studentId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;
 }
 
 export async function getStudentSkills(token, studentId) {
-  const res = await axios.get(`/employer/student/${studentId}/skills`, {
+  const res = await axios.get(`${BASE_URL}/employer/student/${studentId}/skills`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;
 }
 
 export async function getSchoolOptions() {
-  const res = await axios.get(`/employer/schools`);
+  const res = await axios.get(`${BASE_URL}/employer/schools`);
   return res.data;
 }
 
@@ -25,25 +27,12 @@ export const searchStudentsBySkills = async (techSkills = [], softSkills = [], t
   if (softSkills.length) params.append("softSkills", softSkills.join(","));
 
   try {
-    console.log("🔍 EmployerService: Search student skills");
-    console.log("📝 Skills:", techSkills);
-    console.log("📝 Soft skills:", softSkills);
-    console.log("🌐 URL:", `/employer/search-students?${params.toString()}`);
-    
-    const response = await axios.get(`/employer/search-students?${params.toString()}`, {
+    const response = await axios.get(`${BASE_URL}/employer/search-students?${params.toString()}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    
-    console.log("✅ EmployerService: Search successful, found", response.data?.length || 0, "students");
     return response.data;
   } catch (error) {
-    console.error("❌ EmployerService: Search for student failed:", error);
-    console.error("🔍 Error details:", {
-      message: error.message,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data
-    });
+    console.error("Error searching students:", error);
     throw error;
   }
 };
