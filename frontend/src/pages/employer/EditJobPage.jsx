@@ -81,22 +81,22 @@ const EditJobPage = () => {
         const studentMap = new Map();
         
         // Load matched students
-        console.log("🔍 开始查询学生技能匹配...");
-        console.log("📋 技能列表:", job.skills);
+        console.log("🔍 Start searching for student skill matches....");
+        console.log("📋 Skills list:", job.skills);
         
         for (const skill of job.skills || []) {
           try {
-            console.log(`🔍 查询技能: ${skill}`);
+            console.log(`🔍 Searching Skills: ${skill}`);
             const students = await findStudentsBySkill(skill, token, job.softSkills || []);
-            console.log(`✅ 查询到 ${students.length} 名匹配学生`);
+            console.log(`✅ Found  ${students.length} matching students`);
 
             for (const student of students) {
               if (!studentMap.has(student.id)) {
-                console.log(`➕ 添加新学生: ${student.id}`);
+                console.log(`➕ Add New Student: ${student.id}`);
                 studentMap.set(student.id, student);
               } else {
                 // Merge skill titles and accumulate soft skill match count
-                console.log(`🔄 合并已有学生技能: ${student.id}`);
+                console.log(`🔄 Incorporate existing student skills: ${student.id}`);
                 const existing = studentMap.get(student.id);
                 existing.skills = Array.from(new Set([
                   ...(existing.skills || []),
@@ -110,7 +110,7 @@ const EditJobPage = () => {
               }
             }
           } catch (err) {
-            console.error(`❌ 查询技能 "${skill}" 失败:`, err);
+            console.error(`❌ Searching Skills "${skill}" Failed:`, err);
           }
         }
 
@@ -167,7 +167,7 @@ const EditJobPage = () => {
         skills: values.skills || []
       };
       
-      console.log("📤 提交Job更新数据:", jobData);
+      console.log("📤 Submit job to update data:", jobData);
       await updateJob(jobId, jobData, token);
       alert('Job updated successfully');
       navigate('/employer/jobs-list', { state: { reload: true } });

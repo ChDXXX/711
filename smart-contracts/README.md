@@ -6,23 +6,18 @@ Try running some of the following tasks:
 
 
 
-
-
-VITE_RPC_URL=http://127.0.0.1:8545
-is the defate port for forontend,
-for record data long time.
-
-
+**How to test all data via terimial console**
 
 npx hardhat console --network ganache
+
+**get student account information**
 const [deployer] = await ethers.getSigners();
-const skillWallet = await ethers.getContractAt("SkillWallet", "部署的合约地址");
+const skillWallet = await ethers.getContractAt("SkillWallet", "deloped contracts aaddress");
 const result = await skillWallet.getStudentByWallet(
-    "学生钱包"
+    "student wallet address"
 );
 console.log(result);
 
-
-
+**get skill information**
 const [keys, hashes] = await skillWallet.getAllSkills();
 keys.forEach((key, i) => console.log(key, hashes[i]));

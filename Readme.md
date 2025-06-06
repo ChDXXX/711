@@ -34,4 +34,3 @@ how to run：
     (5) select and copy a Private Keys address from ganache terminal to Frontend/.env into VITE_CONTRACT_ADDRESS=
     (6) copy SkillWallet deployed address from deployment terminal to Frontend/.env into VITE_PRIVATE_KEY=
     (7) cd to smart-contracts run: ganache --port 8550 --db ./ganache-db --chain.chainId 1337 --mnemonic "inner increase scissors eight brave vapor leisure perfect robot light join initial"
-

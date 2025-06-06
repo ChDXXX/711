@@ -28,7 +28,8 @@ export default function DigitalSkillWallet() {
   const { t } = useTranslation();
   const theme = useMantineTheme();
   const { customId } = useParams();
-  const uid = customId?.replace(/^S-/, "");
+  // 修复：如果customId以"S-"开头，移除前缀；否则直接使用customId作为uid
+  const uid = customId?.startsWith('S-') ? customId.replace(/^S-/, "") : customId;
 
   const [userData, setUserData] = useState(null);
   const [majorMap, setMajorMap] = useState({});

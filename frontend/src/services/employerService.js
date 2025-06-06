@@ -25,19 +25,19 @@ export const searchStudentsBySkills = async (techSkills = [], softSkills = [], t
   if (softSkills.length) params.append("softSkills", softSkills.join(","));
 
   try {
-    console.log("🔍 EmployerService: 搜索学生技能");
-    console.log("📝 技术技能:", techSkills);
-    console.log("📝 软技能:", softSkills);
-    console.log("🌐 请求URL:", `/employer/search-students?${params.toString()}`);
+    console.log("🔍 EmployerService: Search student skills");
+    console.log("📝 Skills:", techSkills);
+    console.log("📝 Soft skills:", softSkills);
+    console.log("🌐 URL:", `/employer/search-students?${params.toString()}`);
     
     const response = await axios.get(`/employer/search-students?${params.toString()}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     
-    console.log("✅ EmployerService: 搜索成功，找到", response.data?.length || 0, "名学生");
+    console.log("✅ EmployerService: Search successful, found", response.data?.length || 0, "students");
     return response.data;
   } catch (error) {
-    console.error("❌ EmployerService: 搜索学生失败:", error);
+    console.error("❌ EmployerService: Search for student failed:", error);
     console.error("🔍 Error details:", {
       message: error.message,
       status: error.response?.status,

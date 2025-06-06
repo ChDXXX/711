@@ -237,7 +237,7 @@ export default function SchoolVerifySkill() {
           console.log(`✅ Skill sent to blockchain, txHash: ${txHash}`);
         } catch (error) {
           console.error("❌ Blockchain record failed:", error);
-          alert(`区块链记录失败: ${error.message}`);
+          alert(`Blockchain record failure: ${error.message}`);
           return;
         }
       }
@@ -297,9 +297,9 @@ export default function SchoolVerifySkill() {
       });
       
       if (error.response?.data?.message) {
-        alert(`提交失败: ${error.response.data.message}`);
+        alert(`Submission failed: ${error.response.data.message}`);
       } else {
-        alert(`提交失败: ${error.message || '未知错误'}`);
+        alert(`Submission failed: ${error.message || 'Unknown error'}`);
       }
     }
   };

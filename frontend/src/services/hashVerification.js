@@ -42,7 +42,7 @@ async function getSkillHashFromBlockchain(skillData) {
       }
     } catch (error) { /* ignore */ }
 
-    console.log('📄 Using the contract address from the deployment file:', contractAddress);
+    console.log('📄 Use the contract address in the deployment file:', contractAddress);
 
     const recordKey = ethers.keccak256(
       ethers.solidityPacked(
@@ -120,15 +120,15 @@ async function getSkillHashFromBlockchain(skillData) {
     
     return found ? blockchainHash.slice(2) : null;
   } catch (error) {
-    console.error('Failed to retrieve blockchain hash value:', error);
+    console.error('Failed to obtain blockchain hash value:', error);
     return null;
   }
 }
 
 // 验证数据库和区块链数据的一致性
 export async function verifySkillIntegrity(skillData, skillId) {
-  console.log('🔍 Starting validation of skill data integrity...');
-  console.log('📊 Skill data:', skillData);
+  console.log('🔍 Start verifying skill data integrity...');
+  console.log('📊 Skill Data:', skillData);
   
   try {
     // 生成数据库哈希
@@ -144,11 +144,11 @@ export async function verifySkillIntegrity(skillData, skillId) {
         databaseHash,
         blockchainHash: null,
         error: 'Record not found',
-        message: 'Record not found in blockchain'
+        message: 'No records found on the chain'
       };
     }
     
-    console.log('⛓️ BC hash:', blockchainHash);
+    console.log('⛓️ Blockchain hash:', blockchainHash);
     
     // 比较哈希值
     const isValid = databaseHash === blockchainHash;
@@ -157,14 +157,14 @@ export async function verifySkillIntegrity(skillData, skillId) {
       isValid,
       databaseHash,
       blockchainHash,
-      message: isValid ? 'Data consistent' : 'Data Unconsistent'
+      message: isValid ? 'Data consistency' : 'Data inconsistency'
     };
   } catch (error) {
-    console.error('Validation process error:', error);
+    console.error('Error during verification:', error);
     return {
       isValid: false,
       error: error.message,
-      message: 'Validation process error'
+      message: 'Error during verification'
     };
   }
 } 

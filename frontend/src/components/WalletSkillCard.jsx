@@ -115,9 +115,9 @@ export default function WalletSkillCard({ skills = [] }) {
 
       // Display alert message
       if (result.isValid) {
-        alert(`✅ Validation successful！\n\nDatabase hash: ${result.databaseHash?.substring(0, 16)}...\nBC hash: ${result.blockchainHash?.substring(0, 16)}...\n\n${result.message}`);
+        alert(`✅ Validation successful!\n\nDatabase hash: ${result.databaseHash?.substring(0, 16)}...\nBlockChain hash: ${result.blockchainHash?.substring(0, 16)}...\n\n${result.message}`);
       } else {
-        alert(`❌ Validation unsuccessful!！\n\n${result.message}\n\nDatabase hash: ${result.databaseHash?.substring(0, 16)}...\nBC hash: ${result.blockchainHash?.substring(0, 16)}...\nError: ${result.error || 'Hash mismatch or record not found'}`);
+        alert(`❌ Validation Unsuccessful!\n\n${result.message}\n\nDatabase hash: ${result.databaseHash?.substring(0, 16)}...\nBlockChain hash: ${result.blockchainHash?.substring(0, 16)}...\nerror : ${result.error || 'Hash mismatch or record not found'}`);
       }
 
     } catch (error) {
@@ -246,9 +246,9 @@ export default function WalletSkillCard({ skills = [] }) {
                     size="sm"
                     style={{ fontWeight: 600 }}
                   >
-                    {currentResult?.loading ? "Validation..." : 
-                     currentResult ? (currentResult.isValid ? "Validation successful!" : "Validation unsuccessful!") 
-                     : "Validation Skill"}
+                    {currentResult?.loading ? "Validation now..." : 
+                     currentResult ? (currentResult.isValid ? "Validation successful" : "Validation Unuccessful") 
+                     : "Verify skills data"}
                   </Button>
                   {currentResult && !currentResult.loading && (
                     <Box 
@@ -266,7 +266,7 @@ export default function WalletSkillCard({ skills = [] }) {
                           <IconAlertCircle size={16} color="#dc3545" />
                         }
                         <Text fw={600} size="sm" color={currentResult.isValid ? "#00b46e" : "#dc3545"}>
-                          {currentResult.isValid ? "Validation successful" : "Validation Unsuccessful"}
+                          {currentResult.isValid ? "Verification Success" : "Verification Failed"}
                         </Text>
                       </Group>
                       
@@ -276,7 +276,7 @@ export default function WalletSkillCard({ skills = [] }) {
                       
                       {!currentResult.isValid && currentResult.error && (
                         <Text size="xs" c="dimmed" mb={4}>
-                          Error message: {typeof currentResult.error === 'object' ? JSON.stringify(currentResult.error) : currentResult.error}
+                          error message: {typeof currentResult.error === 'object' ? JSON.stringify(currentResult.error) : currentResult.error}
                         </Text>
                       )}
                       
@@ -291,7 +291,7 @@ export default function WalletSkillCard({ skills = [] }) {
                       
                       {currentResult.blockchainHash && (
                         <Group spacing={4}>
-                          <Text size="xs" c="dimmed" fw={500}>BC hash:</Text>
+                          <Text size="xs" c="dimmed" fw={500}>BlockChain hash:</Text>
                           <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
                             {currentResult.blockchainHash.substring(0,12)}...
                           </Text>

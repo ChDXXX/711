@@ -128,7 +128,7 @@ export default function Register() {
           schoolId,
           wallet.address
         );
-        console.log(`学生数据已上传到区块链，交易哈希: ${txHash}`);
+        console.log(`Student data has been uploaded to the blockchain, transaction hash: ${txHash}`);
       }
       // 上传学生数据到区块链
 
