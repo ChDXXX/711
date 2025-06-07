@@ -1,36 +1,95 @@
-IFN711
-global installation
-plz use node.js v20, which is the only version can export ipfs.
+Digital Skill Wallet – IFN711 Final Project
+
+A blockchain-integrated skill validation platform that enables students to submit skills, allows teachers to verify and score them, and provides employers with student skill-matching and job application review features.
+
+Project Overview
+
+Course: IFN711 - Enterprise Project
+Developer:Team 83
+Project Type: Full-stack web app with blockchain integration
+Deployment: Firebase Hosting and Cloud Functions
+
+Global Installation Requirements
+
+Please use Node.js v20, which is the only version compatible with IPFS export.
+
 npm install -g firebase-tools ganache
 
-Functions
-#1. npm init -y
-#2. npm install express mysql2 dotenv firebase-admin cors ipfs-http-client
-#3. npm install multer
-#4. npm install ipfs-http-client@56.0.3
-#5. firebase emulators:start
+Backend (Functions)
+
+Step 1
+npm init -y
+
+Step 2
+npm install express mysql2 dotenv firebase-admin cors ipfs-http-client
+
+Step 3
+npm install multer
+
+Step 4
+npm install ipfs-http-client@56.0.3
+
+Step 5
+firebase emulators:start
 
 Frontend
-#1. npm init -y  
-#2. npm install react react-dom firebase axios ethers react-router-dom dayjs echarts-for-react prop-types  
-#3. npm install @mantine/core@8.0.0 @mantine/hooks@8.0.0 @mantine/carousel@8.0.0 @mantine/form@8.0.0 @tabler/icons-react  
-#4. npm install -D vite@6.2.6 @vitejs/plugin-react
 
-smart-contracts:
+Step 1
+npm init -y
+
+Step 2
+npm install react react-dom firebase axios ethers react-router-dom dayjs echarts-for-react prop-types
+
+Step 3
+npm install @mantine/core@8.0.0 @mantine/hooks@8.0.0 @mantine/carousel@8.0.0 @mantine/form@8.0.0 @tabler/icons-react
+
+Step 4
+npm install -D vite@6.2.6 @vitejs/plugin-react
+
+Smart Contracts
+
 cd smart-contracts
-#1 npm install --save-dev hardhat solc
-#2 npm install @openzeppelin/contracts
 
+Step 1
+npm install --save-dev hardhat solc
 
+Step 2
+npm install @openzeppelin/contracts
 
-how to run：
-#1. click start-project.bat
+How to Run the Project
 
+Step 1
+Double-click start-project.bat
 
-#2. (1) back to ddigital-skill-wallet run code: firebase emulators:start --only functions
-    (2) cd to frontend run: npm run dev
-    (3) cd to smart-contracts run:npx hardhat compile
-    (4) npx hardhat run scripts/deploy.js --network ganache (and open a new terminal to run this line)
-    (5) select and copy a Private Keys address from ganache terminal to Frontend/.env into VITE_CONTRACT_ADDRESS=
-    (6) copy SkillWallet deployed address from deployment terminal to Frontend/.env into VITE_PRIVATE_KEY=
-    (7) cd to smart-contracts run: ganache --port 8550 --db ./ganache-db --chain.chainId 1337 --mnemonic "inner increase scissors eight brave vapor leisure perfect robot light join initial"
+Alternatively, you can run manually with these steps:
+
+Step 2.1
+From root folder (digital-skill-wallet):
+firebase emulators:start --only functions
+
+Step 2.2
+cd frontend
+npm run dev
+
+Step 2.3
+cd smart-contracts
+npx hardhat compile
+
+Step 2.4
+npx hardhat run scripts/deploy.js --network ganache
+(Note: This should be done in a new terminal window.)
+
+Step 2.5
+Copy a Private Key address from the ganache UI
+Paste it into frontend/.env as:
+VITE_PRIVATE_KEY=
+
+Step 2.6
+Copy SkillWallet contract address from deployment terminal
+Paste it into frontend/.env as:
+VITE_CONTRACT_ADDRESS=
+
+Ganache Run Command
+
+cd smart-contracts
+ganache --port 8550 --db ./ganache-db --chain.chainId 1337 --mnemonic "inner increase scissors eight brave vapor leisure perfect robot light join initial"
