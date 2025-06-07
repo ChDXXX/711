@@ -22,7 +22,7 @@ import { verifySkillIntegrity } from '../services/hashVerification';
 const levelValue = (lvl) =>
   lvl === 'Beginner' ? 33 : lvl === 'Intermediate' ? 66 : 100;
 
-export default function WalletSkillCard({ skills = [] }) {
+export default function WalletSkillCard({ skills = [], softSkillMap=[] }) {
   const theme = useMantineTheme();
   const [verifyingSkills, setVerifyingSkills] = useState(new Set());
   const [verificationResults, setVerificationResults] = useState({});
@@ -226,7 +226,7 @@ export default function WalletSkillCard({ skills = [] }) {
                         color="gray"
                         style={{ color: theme.white }}
                       >
-                        {tag}
+                        {softSkillMap[tag] || tag}
                       </Badge>
                     ))}
                   </Group>

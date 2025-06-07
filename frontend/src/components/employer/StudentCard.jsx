@@ -155,7 +155,7 @@ function StudentCard({
           mt="xs"
           variant="light"
           /*onClick={() => setOpenedModalId(studentId)}*/
-          onClick={() => navigate(`/digital-skill-wallet/${id}`)}
+          onClick={() => navigate(`/digital-skill-wallet/${studentId}`)}
         >
           Show Dashboard
         </Button>

@@ -36,37 +36,18 @@ const getBadgeColor = (status) => {
 };
 
 export default function AssignedJobs() {
-  const { user } = useAuth();
+  const { token, user } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const loadJobs = async () => {
     try {
-      console.log("🔍 Fetching jobs...");
-      console.log("User:", user ? "✅ Logged in" : "❌ Not logged in");
-      
-      if (!user) {
-        console.error("❌ No user found, cannot fetch jobs");
-        return;
-      }
-      
-      const token = await user.getIdToken();  // 获取最新token
-      console.log("🎫 Token obtained:", token ? "✅ Success" : "❌ Failed");
-      console.log("🌐 API Base URL:", import.meta.env.VITE_API_BASE_URL);
-      console.log("🌐 Environment:", import.meta.env.DEV ? 'Development' : 'Production');
-      
       const fetchedJobs = await fetchJobs(token);
       setJobs(fetchedJobs);
       setError(null);
-      console.log("✅ Jobs fetched successfully:", fetchedJobs.length, "items");
     } catch (err) {
-      console.error("❌ Failed to fetch jobs:", err);
-      console.error("Error details:", {
-        message: err.message,
-        code: err.code,
-        config: err.config
-      });
+      console.error("Error fetching jobs:", err);
       setError("Failed to fetch jobs.");
       setJobs([]);
     } finally {
@@ -75,8 +56,8 @@ export default function AssignedJobs() {
   };
 
   useEffect(() => {
-    if (user) loadJobs();
-  }, [user]);
+    if (token) loadJobs();
+  }, [token]);
 
   if (loading) {
     return (
@@ -94,16 +75,9 @@ export default function AssignedJobs() {
 
       {jobs.length > 0 ? (
         jobs.map((job) => {
-          // ✅ 适配后端数据结构：job直接包含studentId和status
-          console.log("🔍 Processing job:", job.id, "studentId:", job.studentId, "status:", job.status);
-          
-          // 检查这个job是否分配给当前用户
-          const isAssignedToMe = job.studentId === user?.uid;
-          
-          if (!isAssignedToMe) {
-            console.log("⏭️ Skipping job", job.id, "not assigned to current user");
-            return null; // 跳过不属于当前用户的工作
-          }
+          const assignment = job.assignments?.find(
+            (a) => a.studentId === user?.uid
+          );
 
           return (
             <Box key={job.id} className={classes.jobcard}>
@@ -113,29 +87,29 @@ export default function AssignedJobs() {
               </div>
 
               <div className={classes.jobaction}>
-                <>
-                  <Badge
-                    className={classes.jobstatus}
-                    color={
-                      job.status === "accepted"
-                        ? "green"
-                        : job.status === "rejected"
-                        ? "red"
-                        : "gray"
-                    }
-                  >
-                    Status: {job.status}
-                  </Badge>
+                {assignment && (
+                  <>
+                    <Badge
+                      className={classes.jobstatus}
+                      color={
+                        assignment.status === "accepted"
+                          ? "green"
+                          : assignment.status === "rejected"
+                          ? "red"
+                          : "gray"
+                      }
+                    >
+                      Status: {assignment.status}
+                    </Badge>
 
-                  <div className={classes.jobbuttons}>
-                    {job.status === "assigned" && (
+                    <div className={classes.jobbuttons}>
+                      {assignment.status === "assigned" && (
                         <>
                           <Button
                             size="xs"
                             color="green"
                             onClick={async () => {
                               try {
-                                const token = await user.getIdToken();
                                 await acceptJob(job.id, token);
                                 alert("Job accepted");
                                 await loadJobs();
@@ -153,7 +127,6 @@ export default function AssignedJobs() {
                             color="red"
                             onClick={async () => {
                               try {
-                                const token = await user.getIdToken();
                                 await rejectJob(job.id, token);
                                 alert("Job rejected");
                                 await loadJobs();
@@ -168,31 +141,31 @@ export default function AssignedJobs() {
                         </>
                       )}
 
-                    {job.status === "accepted" && (
-                      <Button
-                        size="xs"
-                        color="blue"
-                        onClick={async () => {
-                          try {
-                            const token = await user.getIdToken();
-                            await completeJob(job.id, token);
-                            alert("Job completed");
-                            await loadJobs();
-                          } catch (err) {
-                            alert("Failed to complete job");
-                            console.error(err);
-                          }
-                        }}
-                      >
-                        Complete
-                      </Button>
-                    )}
-                  </div>
-                </>
+                      {assignment.status === "accepted" && (
+                        <Button
+                          size="xs"
+                          color="blue"
+                          onClick={async () => {
+                            try {
+                              await completeJob(job.id, token);
+                              alert("Job completed");
+                              await loadJobs();
+                            } catch (err) {
+                              alert("Failed to complete job");
+                              console.error(err);
+                            }
+                          }}
+                        >
+                          Complete
+                        </Button>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             </Box>
           );
-        }).filter(Boolean)
+        })
       ) : (
         <Text>No jobs assigned.</Text>
       )}

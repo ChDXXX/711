@@ -1,4 +1,4 @@
-import { MultiSelect, Card, Avatar, Text, Group, Grid, Box, Select, Progress, Button, Modal, Stack, TextInput } from '@mantine/core';
+import { MultiSelect,Loader,Center,  Card, Avatar, Text, Group, Grid, Box, Select, Progress, Button, Modal, Stack, TextInput } from '@mantine/core';
 import { IconBrandHtml5, IconBrandCss3, IconBrandJavascript, IconBrandPython, IconBrandReact, IconBrandNodejs, IconBrandMessenger, IconBrandTeams } from '@tabler/icons-react';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
@@ -13,6 +13,7 @@ const EmployerStudentsList = () => {
   const [selectedSoftSkills, setSelectedSoftSkills] = useState([]);
   const [selectedTechSkills, setSelectedTechSkills] = useState([]);
   const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { token } = useAuth();
   const [softSkillOptions, setSoftSkillOptions] = useState([]);
 
@@ -20,6 +21,9 @@ const EmployerStudentsList = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
+        setLoading(true);
+
+        
         // Load students based on selected filters
         const result = await searchStudentsBySkills(selectedTechSkills, selectedSoftSkills, token);
         console.log(result);
@@ -29,9 +33,12 @@ const EmployerStudentsList = () => {
         const softSkills = await fetchSoftSkills(token);
         setSoftSkillOptions(softSkills.map(s => ({ value: s.id, label: s.name })));
 
+        setLoading(false);
+
         
       } catch (err) {
         console.error("Failed to load data", err);
+        setLoading(false);
       }
     };
 
@@ -42,6 +49,8 @@ const EmployerStudentsList = () => {
   const handleJobChange = (studentId, job) => {
     setAssignedJobs((prev) => ({ ...prev, [studentId]: job }));
   };
+
+  
   
   return (
     <Box flex={1} mt="30px">
@@ -76,20 +85,33 @@ const EmployerStudentsList = () => {
             placeholder="Select soft skills"
           />
         </Grid.Col>        
-        {students.map((student) => (
-          <Grid.Col key={student.id} span={{ base: 12, sm: 6, md: 4, lg: 4 }}>
-            <StudentCard
-              {...student}
-              showTechnicalSkills = {false}
-              setOpenedModalId={setOpenedModalId}
-              openedModalId={openedModalId}
-              assignedJobs={assignedJobs}
-              showAssignButton={false}
-              handleJobChange={handleJobChange}
-            />
-                 
+        {/* Student List */}
+          <Grid.Col span={12}>
+            {loading ? (
+              // Show loader while searching
+              <Center mt="lg"><Loader /></Center>
+            ) : students.length === 0 ? (
+              // No students found
+              <Center mt="lg"><Text>No students found matching the selected skills.</Text></Center>
+            ) : (
+              // Show students
+              <Grid gutter="xl">
+                {students.map((student) => (
+                  <Grid.Col key={student.id} span={{ base: 12, sm: 6, md: 4, lg: 4 }}>
+                    <StudentCard
+                      {...student}
+                      showTechnicalSkills={false}
+                      setOpenedModalId={setOpenedModalId}
+                      openedModalId={openedModalId}
+                      assignedJobs={assignedJobs}
+                      showAssignButton={false}
+                      handleJobChange={handleJobChange}
+                    />
+                  </Grid.Col>
+                ))}
+              </Grid>
+            )}
           </Grid.Col>
-        ))}
       </Grid>
     </Box>
   );
