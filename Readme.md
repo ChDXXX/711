@@ -93,3 +93,5 @@ Ganache Run Command
 
 cd smart-contracts
 ganache --port 8550 --db ./ganache-db --chain.chainId 1337 --mnemonic "inner increase scissors eight brave vapor leisure perfect robot light join initial"
+
+Firebase link：https://digital-skill-wallet.web.app
